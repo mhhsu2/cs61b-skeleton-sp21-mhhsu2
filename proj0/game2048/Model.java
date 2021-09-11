@@ -137,7 +137,15 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        int size = b.size();
+        for (int col = 0; col < size; col += 1) {
+            for (int row = 0; row < size; row += 1) {
+                Tile value = b.tile(col, row);
+                if (value == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -147,7 +155,20 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        int size = b.size();
+        for (int col = 0; col < size; col += 1) {
+            for (int row = 0; row < size; row += 1) {
+                Tile t = b.tile(col, row);
+                if (t != null) {
+                    if (t.value() == MAX_PIECE) {
+                        return true;
+                    }
+                }
+                else {
+                    continue;
+                }
+            }
+        }
         return false;
     }
 
@@ -158,8 +179,57 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        int size = b.size();
+        for (int col = 0; col < size; col += 1) {
+            for (int row = 0; row < size; row += 1) {
+                Tile t = b.tile(col, row);
+                if (t == null) {
+                    return true;
+                }
+                else {
+                    if (isAbleToMerge(b, col, row)) {
+                        return true;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+            }
+        }
         return false;
+    }
+
+    public static boolean isAbleToMerge(Board b, int col, int row) {
+        int value = b.tile(col, row).value();
+
+        Tile[] neighborTiles = getNeighborTiles(b, col, row);
+        for (int i = 0; i < neighborTiles.length; i += 1) {
+            if (neighborTiles[i] != null) {
+                if (value == neighborTiles[i].value()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Tile[] getNeighborTiles(Board b, int col, int row) {
+        int size = b.size();
+        Tile[] neighborTiles = new Tile[4];
+
+        if (row - 1 >= 0) {
+            neighborTiles[0] = b.tile(col, row - 1);
+        }
+        if (row + 1 < size) {
+            neighborTiles[1] = b.tile(col, row + 1);
+        }
+        if (col - 1 >= 0) {
+            neighborTiles[2] = b.tile(col - 1, row);
+        }
+        if (col + 1 < size) {
+            neighborTiles[3] = b.tile(col + 1, row);
+        }
+        return neighborTiles;
     }
 
 
