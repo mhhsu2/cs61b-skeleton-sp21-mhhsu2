@@ -110,9 +110,15 @@ public class Model extends Observable {
         boolean changed;
         changed = false;
 
+        board.setViewingPerspective(side);
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        for (int col = 0; col < board.size(); col +=1) {
+            score += tiltCol(col);
+        }
+        changed = true;
+        board.setViewingPerspective(Side.NORTH);
 
         checkGameOver();
         if (changed) {
@@ -120,6 +126,87 @@ public class Model extends Observable {
         }
         return changed;
     }
+
+    public int tiltCol(int col) {
+        Tile[] colTiles = new Tile[board.size()];
+        boolean[] colTilesMerged = new boolean[board.size()];
+        int score = 0;
+
+        for (int row = board.size() - 1; row >= 0; row -= 1) {
+            colTiles[row] = board.tile(col, row);
+
+            if (colTiles[row] != null) {
+                int rowBumped = row + 1;
+                boolean bumped = false;
+
+                while (bumped == false) {
+                    /** If hit the boundary,
+                     * bumped and move to the space before the boundary. */
+                    if (rowBumped == board.size()) {
+                        bumped = true;
+                        board.move(col, rowBumped - 1, colTiles[row]);
+                        colTiles[rowBumped - 1] = board.tile(col, rowBumped - 1);
+                        colTiles[row] = board.tile(col, row);
+                    }
+                    else {
+                        Tile tileBumped = board.tile(col, rowBumped);
+                        /** If the next tile is empty,
+                         * just point to the one after the next tile. */
+                        if (tileBumped == null) {
+                            rowBumped += 1;
+                        }
+                        /** If bumped into another tile,
+                         * decide whether we can merge or not. */
+                        else {
+                            /** If the value of the tile is
+                             *  the same as the value of the bumped tile and
+                             *  the bumped tile has not been merged. Merge it.*/
+                            if (colTiles[row].value() == tileBumped.value() && colTilesMerged[rowBumped] == false) {
+                                bumped = true;
+                                board.move(col, rowBumped, colTiles[row]);
+                                colTilesMerged[rowBumped] = true;
+                                colTiles[rowBumped] = board.tile(col, rowBumped);
+                                colTiles[row] = board.tile(col, row);
+                                score += colTiles[rowBumped].value();
+                            }
+                            /** If not, move to the last empty space. */
+                            else {
+                                bumped = true;
+                                board.move(col, rowBumped - 1, colTiles[row]);
+                                colTiles[rowBumped - 1] = board.tile(col, rowBumped - 1);
+                                colTiles[row] = board.tile(col, row);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return score;
+    }
+
+//    public int getRowBumped(Tile t, int col, int row) {
+//        int rowBumped = row + 1;
+//        boolean bumped = false;
+//
+//        while (bumped == false) {
+//            /** If it's already at the boundary, bumped. */
+//            if (rowBumped == board.size()) {
+//                bumped = true;
+//            }
+//            else {
+//                Tile tileBumped = board.tile(col, rowBumped);
+//                if (tileBumped == null) {
+//                    rowBumped += 1;
+//                }
+//                else {
+//                    if (t.value() == tileBumped.value()) {
+//                        return rowBumped;
+//                    }
+//                }
+//            }
+//        }
+//        return rowBumped - 1;
+//    }
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
