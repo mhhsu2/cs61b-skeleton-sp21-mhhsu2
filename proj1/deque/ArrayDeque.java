@@ -60,6 +60,10 @@ public class ArrayDeque<T> {
 
     /** Remove the first item in a deque. */
     public T removeFirst() {
+        if (isEmpty()) {
+            return null;
+        }
+
         int idxFront = nextFront + 1;
         if (idxFront > items.length - 1) {
             idxFront = 0;
@@ -81,6 +85,10 @@ public class ArrayDeque<T> {
 
     /** Remove the first item in a deque. */
     public T removeLast() {
+        if (isEmpty()) {
+            return null;
+        }
+
         int idxBack = nextBack - 1;
         if (idxBack < 0) {
             idxBack = items.length - 1;

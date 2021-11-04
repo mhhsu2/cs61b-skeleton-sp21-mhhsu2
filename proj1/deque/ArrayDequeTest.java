@@ -1,6 +1,7 @@
 package deque;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class ArrayDequeTest {
     @Test
@@ -121,5 +122,15 @@ public class ArrayDequeTest {
 
         int index = 5;
         System.out.println("Get index " + index + " : " + aDeque.get(index));
+    }
+
+    @Test
+    public void testEmptyReturnNull() {
+    ArrayDeque<Integer> aDeque = new ArrayDeque<>();
+
+    boolean passed1 = false;
+    boolean passed2 = false;
+    assertEquals("Should return null when removeFirst is called on an empty Deque,", null, aDeque.removeFirst());
+    assertEquals("Should return null when removeLast is called on an empty Deque,", null, aDeque.removeLast());
     }
 }
