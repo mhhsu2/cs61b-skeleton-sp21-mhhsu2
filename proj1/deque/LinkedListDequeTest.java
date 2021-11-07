@@ -131,4 +131,51 @@ public class LinkedListDequeTest {
         }
 
     }
+
+    @Test
+    /* Test if LinkedListDeque is iterable or not. */
+    public void iterableDequeTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+        }
+
+        for (int j : lld1) {
+            System.out.println(j);
+        }
+    }
+
+    @Test
+    /* Test if two LinkedListDeque is equal or not. */
+    public void equalsTwoLinkedListDequeTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
+
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+            lld2.addLast(i);
+        }
+
+        assertEquals("Two deques are equal, should return true", true, lld1.equals(lld2));
+
+        LinkedListDeque<Integer> lld3 = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld3.addFirst(i);
+        }
+
+        assertEquals("Two deques are not equal, should return false", false, lld1.equals(lld3));
+    }
+
+    @Test
+    /* Test if the equals method handle null or not. */
+    public void equalsNullTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        LinkedListDeque<Integer> lld2 = null;
+
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+        }
+
+        assertEquals("One is null, should return false.", false, lld1.equals(lld2));
+    }
 }

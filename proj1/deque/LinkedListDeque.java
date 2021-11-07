@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T> {
 
     /** Generic doubly linked node implementation */
     private class StuffNode {
@@ -23,11 +25,6 @@ public class LinkedListDeque<T> {
     public LinkedListDeque() {
         sentinel = new StuffNode(null, null, null);
         size = 0;
-    }
-
-    public LinkedListDeque(T x) {
-        sentinel = new StuffNode(x, null, null);
-        size = 1;
     }
 
     /** Add x to the front of the list. */
@@ -137,5 +134,49 @@ public class LinkedListDeque<T> {
         } else {
             return getRecursiveNode(index - 1, node.next);
         }
+    }
+
+
+    /* Return an iterator. */
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private StuffNode p;
+
+        public LinkedListDequeIterator() {
+            p = sentinel;
+        }
+
+        public boolean hasNext() {
+            return p.next.item != null;
+        }
+
+        public T next() {
+            T returnItem = p.next.item;
+            p = p.next;
+            return returnItem;
+        }
+    }
+
+    /* Returns whether or not the parameter o is equal to the Deque. */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        if (o == this) { return true; }
+        if (!(o instanceof LinkedListDeque)) {return false;}
+
+        LinkedListDeque<T> other = (LinkedListDeque) o;
+        if (other.size != this.size) { return false; }
+
+        StuffNode pOther = other.sentinel;
+        StuffNode pThis = this.sentinel;
+        for (int i = 0; i < other.size; i++) {
+            if (!pThis.next.item.equals(pOther.next.item)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
