@@ -133,4 +133,54 @@ public class ArrayDequeTest {
     assertEquals("Should return null when removeFirst is called on an empty Deque,", null, aDeque.removeFirst());
     assertEquals("Should return null when removeLast is called on an empty Deque,", null, aDeque.removeLast());
     }
+
+    @Test
+    /* Test if two ArrayDeque is equal or not. */
+    public void testEqualsTwoArrayDeque() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<>();
+        ArrayDeque<Integer> lld2 = new ArrayDeque<>();
+
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+            lld2.addLast(i);
+        }
+
+        assertEquals("Two deques are equal, should return true", true, lld1.equals(lld2));
+
+        ArrayDeque<Integer> lld3 = new ArrayDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld3.addFirst(i);
+        }
+
+        assertEquals("Two deques are not equal, should return false", false, lld1.equals(lld3));
+    }
+
+    @Test
+    /* Test if the equals method handle null or not. */
+    public void testEqualsNull() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<>();
+        ArrayDeque<Integer> lld2 = null;
+
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+        }
+
+        assertEquals("One is null, should return false.", false, lld1.equals(lld2));
+    }
+
+    @Test
+    /* Test whether ArrayDeque is iterable or not. */
+    public void testIterable() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+        }
+        for (int i = 10; i < 20; i++) {
+            lld1.addFirst(i);
+        }
+
+        for (int j : lld1) {
+            System.out.println(j);
+        }
+    }
 }

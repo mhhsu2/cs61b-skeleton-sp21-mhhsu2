@@ -1,14 +1,16 @@
 package deque;
 
-public class ArrayDeque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Iterable<T> {
     /**
      * Invarints:
      *  1. The index of the front is always nextFront + 1
      *  2. The index of the back is always nextBack - 1
      */
-    private T[] items;
-    private int size;
-    private int nextFront;
+    protected T[] items;
+    protected int size;
+    protected int nextFront;
     private int nextBack;
     private int resizeFactor;
     private double minUsageRatio;
@@ -159,5 +161,48 @@ public class ArrayDeque<T> {
     /** Check if a deque is empty of not */
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    /* Return an iterator. */
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int pos = nextFront + 1;
+
+        public boolean hasNext() {
+//            if (pos == nextBack) { return false; } // Hit the end of the deque.
+            if (pos > items.length - 1) {
+                pos = 0;
+            }
+            if (items[pos] == null) {
+                return false;
+            }
+            return true;
+        }
+
+        public T next() {
+            T returnItem = items[pos];
+            pos += 1;
+            return returnItem;
+        }
+    }
+
+    /* Returns whether the parameter o is equal to the Deque. */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        if (o == this) { return true; }
+        if (!(o instanceof ArrayDeque)) {return false;}
+
+        ArrayDeque<T> other = (ArrayDeque) o;
+        if (other.size != this.size) { return false; }
+
+        for (int i = 0; i < other.size; i++) {
+            if (!this.items[i].equals(other.items[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 }

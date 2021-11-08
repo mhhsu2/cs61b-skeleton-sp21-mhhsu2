@@ -160,7 +160,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
         }
     }
 
-    /* Returns whether or not the parameter o is equal to the Deque. */
+    /* Returns whether the parameter o is equal to the Deque. */
     @Override
     public boolean equals(Object o) {
         if (o == null) { return false; }

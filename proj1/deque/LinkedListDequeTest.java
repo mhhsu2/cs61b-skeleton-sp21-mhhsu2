@@ -147,7 +147,7 @@ public class LinkedListDequeTest {
 
     @Test
     /* Test if two LinkedListDeque is equal or not. */
-    public void equalsTwoLinkedListDequeTest() {
+    public void testEqualsTwoLinkedListDeque() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
         LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
 
@@ -168,7 +168,7 @@ public class LinkedListDequeTest {
 
     @Test
     /* Test if the equals method handle null or not. */
-    public void equalsNullTest() {
+    public void testEqualsNull() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
         LinkedListDeque<Integer> lld2 = null;
 
