@@ -150,7 +150,10 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         }
 
         public boolean hasNext() {
-            if (p.next == null) { return false; } // Support empty deque.
+            // Support empty deque.
+            if (p.next == null) {
+                return false;
+            }
             return p.next.item != null;
         }
 

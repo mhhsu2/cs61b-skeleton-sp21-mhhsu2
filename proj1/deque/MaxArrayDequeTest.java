@@ -1,5 +1,6 @@
 package deque;
 
+import net.sf.saxon.functions.Minimax;
 import org.junit.Test;
 
 import java.util.Comparator;
@@ -9,7 +10,7 @@ public class MaxArrayDequeTest {
     @Test
     /* Test IntComparator of MaxArrayDeque */
     public void testIntComparator() {
-        Comparator<Integer> ct = new MaxArrayDeque.IntComparator();
+        Comparator<Integer> ct = MaxArrayDeque.getIntComparator();
         MaxArrayDeque<Integer> a = new MaxArrayDeque<>(ct);
         assertNull("Max should be null.", a.max());
 
@@ -29,7 +30,7 @@ public class MaxArrayDequeTest {
     @Test
     /* Test IntComparator of MaxArrayDeque */
     public void testLastCharComparator() {
-        Comparator<String> ct = new MaxArrayDeque.LastCharComparator();
+        Comparator<String> ct = MaxArrayDeque.getLastCharComparator();
         MaxArrayDeque<String> a = new MaxArrayDeque<>(ct);
         assertNull("Max should be null.", a.max());
 
@@ -46,9 +47,9 @@ public class MaxArrayDequeTest {
     @Test
     /* Test IntComparator of MaxArrayDeque */
     public void testAssignedComparator() {
-        Comparator ct = new MaxArrayDeque.IntComparator();
-        MaxArrayDeque<String> a = new MaxArrayDeque<>(ct);
-        Comparator<String> assignedCt = new MaxArrayDeque.LastCharComparator();
+        Comparator<Integer> ct = MaxArrayDeque.getIntComparator();
+        MaxArrayDeque<String> a = new MaxArrayDeque(ct);
+        Comparator<String> assignedCt = MaxArrayDeque.getLastCharComparator();
         assertNull("Max should be null.", a.max(assignedCt));
 
 

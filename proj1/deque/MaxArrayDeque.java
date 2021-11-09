@@ -3,25 +3,33 @@ package deque;
 import java.util.Comparator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
-    public Comparator<T> ct;
+    private Comparator<T> ct;
 
     public MaxArrayDeque(Comparator<T> assignedComparator) {
         super();
         ct = assignedComparator;
     }
 
-    public static class IntComparator implements Comparator<Integer> {
+    private static class IntComparator implements Comparator<Integer> {
         public int compare(Integer a, Integer b) {
             return a - b;
         }
     }
 
-    public static class LastCharComparator implements Comparator<String> {
+    private static class LastCharComparator implements Comparator<String> {
         public int compare(String a, String b) {
             String lastCharA = a.substring(a.length() - 1);
             String lastCharB = b.substring(b.length() - 1);
             return lastCharA.compareTo(lastCharB);
         }
+    }
+
+    public static Comparator<String> getLastCharComparator() {
+        return new LastCharComparator();
+    }
+
+    public static Comparator<Integer> getIntComparator() {
+        return new IntComparator();
     }
 
     public T max() {

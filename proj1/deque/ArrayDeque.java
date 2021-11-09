@@ -200,7 +200,9 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         }
 
         Deque other = (Deque) o;
-        if (other.size() != this.size()) { return false; }
+        if (other.size() != this.size()) {
+            return false;
+        }
 
         for (int i = 0; i < other.size(); i++) {
             if (!this.get(i).equals(other.get(i))) {
