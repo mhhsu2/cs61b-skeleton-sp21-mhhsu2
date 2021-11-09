@@ -8,9 +8,9 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
      *  1. The index of the front is always nextFront + 1
      *  2. The index of the back is always nextBack - 1
      */
-    protected T[] items;
-    protected int size;
-    protected int nextFront;
+    private T[] items;
+    private int size;
+    private int nextFront;
     private int nextBack;
     private int resizeFactor;
     private double minUsageRatio;

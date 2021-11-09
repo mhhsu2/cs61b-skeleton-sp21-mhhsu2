@@ -46,7 +46,7 @@ public class MaxArrayDequeTest {
     @Test
     /* Test IntComparator of MaxArrayDeque */
     public void testAssignedComparator() {
-        Comparator<Integer> ct = new MaxArrayDeque.IntComparator();
+        Comparator ct = new MaxArrayDeque.IntComparator();
         MaxArrayDeque<String> a = new MaxArrayDeque<>(ct);
         Comparator<String> assignedCt = new MaxArrayDeque.LastCharComparator();
         assertNull("Max should be null.", a.max(assignedCt));
