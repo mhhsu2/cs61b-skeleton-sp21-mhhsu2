@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> implements Iterable<T> {
+public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
 
     /** Generic doubly linked node implementation */
     private class StuffNode {
@@ -55,11 +55,11 @@ public class LinkedListDeque<T> implements Iterable<T> {
     public int size() {
         return size;
     }
-
-    /** Check if a deque is empty of not */
-    public boolean isEmpty() {
-        return size == 0;
-    }
+//
+//    /** Check if a deque is empty of not */
+//    public boolean isEmpty() {
+//        return size == 0;
+//    }
 
     /** Print the items in a deque from first to last */
     public void printDeque() {
@@ -137,7 +137,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     }
 
 
-    /* Return an iterator. */
+    /** Return an iterator. */
     public Iterator<T> iterator() {
         return new LinkedListDequeIterator();
     }
@@ -160,7 +160,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
         }
     }
 
-    /* Returns whether the parameter o is equal to the Deque. */
+    /** Returns whether the parameter o is equal to the Deque. */
     @Override
     public boolean equals(Object o) {
         if (o == null) { return false; }

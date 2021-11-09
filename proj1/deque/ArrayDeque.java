@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Iterable<T> {
+public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     /**
      * Invarints:
      *  1. The index of the front is always nextFront + 1
@@ -157,13 +157,13 @@ public class ArrayDeque<T> implements Iterable<T> {
         }
         return items[relativeIndex];
     }
+//
+//    /** Check if a deque is empty of not */
+//    public boolean isEmpty() {
+//        return size == 0;
+//    }
 
-    /** Check if a deque is empty of not */
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    /* Return an iterator. */
+    /** Return an iterator. */
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
@@ -188,7 +188,7 @@ public class ArrayDeque<T> implements Iterable<T> {
         }
     }
 
-    /* Returns whether the parameter o is equal to the Deque. */
+    /** Returns whether the parameter o is equal to the Deque. */
     @Override
     public boolean equals(Object o) {
         if (o == null) { return false; }
