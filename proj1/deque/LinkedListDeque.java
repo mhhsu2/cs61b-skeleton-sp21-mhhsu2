@@ -150,6 +150,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         }
 
         public boolean hasNext() {
+            if (p.next == null) { return false; } // Support empty deque.
             return p.next.item != null;
         }
 
@@ -165,15 +166,13 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     public boolean equals(Object o) {
         if (o == null) { return false; }
         if (o == this) { return true; }
-        if (!(o instanceof LinkedListDeque)) {return false;}
+        if (!(o instanceof Deque)) {return false;}
 
-        LinkedListDeque<T> other = (LinkedListDeque) o;
-        if (other.size != this.size) { return false; }
+        Deque other = (Deque) o;
+        if (other.size() != this.size()) { return false; }
 
-        StuffNode pOther = other.sentinel;
-        StuffNode pThis = this.sentinel;
-        for (int i = 0; i < other.size; i++) {
-            if (!pThis.next.item.equals(pOther.next.item)) {
+        for (int i = 0; i < other.size(); i++) {
+            if (!this.get(i).equals(other.get(i))) {
                 return false;
             }
         }
