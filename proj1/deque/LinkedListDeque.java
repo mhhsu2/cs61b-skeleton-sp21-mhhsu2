@@ -6,11 +6,11 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
 
     /** Generic doubly linked node implementation */
     private class StuffNode {
-        public T item;
-        public StuffNode next;
-        public StuffNode prev;
+        private T item;
+        private StuffNode next;
+        private StuffNode prev;
 
-        public StuffNode(T i, StuffNode n, StuffNode p) {
+        StuffNode(T i, StuffNode n, StuffNode p) {
             item = i;
             next = n;
             prev = p;
@@ -126,7 +126,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
 
     private StuffNode getRecursiveNode(int index, StuffNode node) {
         // When circles back, no item is found, return null.
-        if (node==sentinel) {
+        if (node == sentinel) {
             return null;
         }
         if (index == 0) {
@@ -145,7 +145,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private class LinkedListDequeIterator implements Iterator<T> {
         private StuffNode p;
 
-        public LinkedListDequeIterator() {
+        LinkedListDequeIterator() {
             p = sentinel;
         }
 
@@ -164,12 +164,20 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     /** Returns whether the parameter o is equal to the Deque. */
     @Override
     public boolean equals(Object o) {
-        if (o == null) { return false; }
-        if (o == this) { return true; }
-        if (!(o instanceof Deque)) {return false;}
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Deque)) {
+            return false;
+        }
 
         Deque other = (Deque) o;
-        if (other.size() != this.size()) { return false; }
+        if (other.size() != this.size()) {
+            return false;
+        }
 
         for (int i = 0; i < other.size(); i++) {
             if (!this.get(i).equals(other.get(i))) {

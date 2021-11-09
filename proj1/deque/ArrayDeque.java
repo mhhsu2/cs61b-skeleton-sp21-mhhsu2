@@ -122,7 +122,8 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
             System.arraycopy(items, idxFront, resizedArray, 0, size);
         } else {
             System.arraycopy(items, idxFront, resizedArray, 0, items.length - idxFront);
-            System.arraycopy(items, 0, resizedArray, items.length - idxFront, size - (items.length - idxFront));
+            System.arraycopy(items, 0, resizedArray,
+                    items.length - idxFront, size - (items.length - idxFront));
         }
         items = resizedArray;
         nextFront = items.length - 1;
@@ -175,10 +176,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
             if (pos > items.length - 1) {
                 pos = 0;
             }
-            if (items[pos] == null) {
-                return false;
-            }
-            return true;
+            return items[pos] != null;
         }
 
         public T next() {
@@ -191,9 +189,15 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     /** Returns whether the parameter o is equal to the Deque. */
     @Override
     public boolean equals(Object o) {
-        if (o == null) { return false; }
-        if (o == this) { return true; }
-        if (!(o instanceof Deque)) {return false;}
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Deque)) {
+            return false;
+        }
 
         Deque other = (Deque) o;
         if (other.size() != this.size()) { return false; }

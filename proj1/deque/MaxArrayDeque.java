@@ -25,9 +25,15 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     public T max() {
-        if (size == 0) { return null; }
+        if (size == 0) {
+            return null;
+        }
+
         int front = nextFront + 1;
-        if (front > items.length - 1) { front = 0;}
+        if (front > items.length - 1) {
+            front = 0;
+        }
+
         T maxItem = items[front];
         for (T item : this) {
             if (this.ct.compare(item, maxItem) > 0) {
@@ -38,9 +44,14 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     public T max(Comparator<T> c) {
-        if (size == 0) { return null; }
+        if (size == 0) {
+            return null;
+        }
+
         int front = nextFront + 1;
-        if (front > items.length - 1) { front = 0;}
+        if (front > items.length - 1) {
+            front = 0;
+        }
         T maxItem = items[front];
         for (T item : this) {
             if (c.compare(item, maxItem) > 0) {
