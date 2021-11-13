@@ -1,11 +1,12 @@
 package capers;
 
 import java.io.File;
+import java.util.Arrays;
 
 import static capers.Utils.*;
 
 /** Canine Capers: A Gitlet Prelude.
- * @author TODO
+ * @author Min-Hsiu Hsu
 */
 public class Main {
     /**
@@ -43,6 +44,9 @@ public class Main {
 
         CapersRepository.setupPersistence();
         String text;
+        String name;
+        String breed;
+        int age;
         switch (args[0]) {
         case "story":
             /* This call has been handled for you. The rest will be similar. */
@@ -52,11 +56,15 @@ public class Main {
             break;
         case "dog":
             validateNumArgs("dog", args, 4);
-            // TODO: make a dog
+            name = args[0];
+            breed = args[1];
+            age = Integer.parseInt(args[2]);
+            CapersRepository.makeDog(name, breed, age);
             break;
         case "birthday":
             validateNumArgs("birthday", args, 2);
-            // TODO: celebrate this dog's birthday
+            name = args[0];
+            CapersRepository.celebrateBirthday(name);
             break;
         default:
             exitWithError(String.format("Unknown command: %s", args[0]));
