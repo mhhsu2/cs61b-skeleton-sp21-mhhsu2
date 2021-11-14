@@ -1,8 +1,5 @@
 package capers;
 
-import java.io.File;
-import java.util.Arrays;
-
 import static capers.Utils.*;
 
 /** Canine Capers: A Gitlet Prelude.
@@ -56,14 +53,14 @@ public class Main {
             break;
         case "dog":
             validateNumArgs("dog", args, 4);
-            name = args[0];
-            breed = args[1];
-            age = Integer.parseInt(args[2]);
+            name = args[1];
+            breed = args[2];
+            age = Integer.parseInt(args[3]);
             CapersRepository.makeDog(name, breed, age);
             break;
         case "birthday":
             validateNumArgs("birthday", args, 2);
-            name = args[0];
+            name = args[1];
             CapersRepository.celebrateBirthday(name);
             break;
         default:

@@ -38,7 +38,11 @@ public class Dog implements Serializable {
      * @return Dog read from file
      */
     public static Dog fromFile(String name) {
-        // TODO (hint: look at the Utils file)
+        File dogFile = join(DOG_FOLDER, name);
+        if (dogFile.exists()) {
+            Dog result = readObject(dogFile, Dog.class);
+            return result;
+        }
         return null;
     }
 
