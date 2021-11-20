@@ -102,7 +102,18 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     /** Prints out the BSTMap in order of increasing key. */
     public void printInOrder() {
+        /* Inorder traverses in the BST. */
+        printInOrderHelper(this.root);
+    }
 
+    private void printInOrderHelper(BSTNode node) {
+        if (node == null) {
+            return;
+        }
+
+        printInOrderHelper(node.left);
+        System.out.println(node.key);
+        printInOrderHelper(node.right);
     }
 
     /**
