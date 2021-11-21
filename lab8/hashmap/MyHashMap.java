@@ -117,7 +117,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
 
         Node newNode = createNode(key, value);
-        int idx = Math.floorMod(key.hashCode(), buckets.length);
+        int idx = getIdx(key);
 
         if (containsKey(key)) {
             for (Node n : buckets[idx]) {
@@ -135,7 +135,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         size += 1;
     }
 
-    public void resize(int capacity) {
+    private void resize(int capacity) {
         Collection<Node>[] oldBuckets = createTable(this.buckets.length);
         System.arraycopy(this.buckets, 0, oldBuckets, 0, this.buckets.length);
         this.buckets = createTable(capacity);
@@ -152,7 +152,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     /** Removes all of the mappings from this map. */
     public void clear() {
-        buckets = null;
+        buckets = createTable(initialSize);
         size = 0;
     }
 
@@ -162,11 +162,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
             return false;
         }
 
-        if (buckets == null) {
-            return false;
-        }
-
-        int idx = Math.floorMod(key.hashCode(), buckets.length);
+        int idx = getIdx(key);
         if (buckets[idx] == null) {
             return false;
         }
@@ -188,11 +184,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
             return null;
         }
 
-        if (buckets == null) {
-            return null;
-        }
-
-        int idx = Math.floorMod(key.hashCode(), buckets.length);
+        int idx = getIdx(key);
         if (buckets[idx] == null) {
             return null;
         }
@@ -221,7 +213,23 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * UnsupportedOperationException.
      */
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            return null;
+        }
+
+        if (!containsKey(key)) {
+            return null;
+        }
+
+        int idx = getIdx(key);
+        for (Node node : buckets[idx]) {
+            if (node.key.equals(key)) {
+                V rmVal = node.value;
+                buckets[idx].remove(node);
+                return rmVal;
+            }
+        }
+        return null;
     }
 
     /**
@@ -230,11 +238,33 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * throw an UnsupportedOperationException.
      */
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            return null;
+        }
+
+        if (!containsKey(key)) {
+            return null;
+        }
+
+        int idx = getIdx(key);
+        for (Node node : buckets[idx]) {
+            if (node.key.equals(key) && node.value.equals(value)) {
+                V rmVal = node.value;
+                buckets[idx].remove(node);
+                return rmVal;
+            }
+        }
+        return null;
     }
 
     @Override
     public Iterator<K> iterator() {
         return this.keySet().iterator();
+    }
+
+
+    /** Helper methods*/
+    private int getIdx(K key) {
+        return Math.floorMod(key.hashCode(), buckets.length);
     }
 }
