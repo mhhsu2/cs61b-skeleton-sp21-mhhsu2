@@ -26,4 +26,22 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /* TODO: fill in the rest of this class. */
+    /**
+     * Does required filesystem operations to allow for persistence.
+     * (creates any necessary folders or files)
+     * Remember: recommended structure (you do not have to follow):
+     *
+     * .capers/ -- top level folder for all persistent data in your lab12 folder
+     *    - dogs/ -- folder containing all of the persistent data for dogs
+     *    - story -- file containing the current story
+     */
+    public static void init() {
+        if (GITLET_DIR.exists()) {
+            errorExit("A Gitlet version-control system already exists in the current directory.");
+        }
+        boolean isCreated = GITLET_DIR.mkdir();
+        if (isCreated) {
+            message("A Gitlet version-control system is initialized.");
+        }
+    }
 }

@@ -236,4 +236,14 @@ class Utils {
         System.out.printf(msg, args);
         System.out.println();
     }
+
+    /**
+     * Print a message composed from MSG and ARGS as for the message,
+     * but exit the program with error code 0.
+     */
+    static void errorExit(String msg, Object... args) {
+        System.out.printf(msg, args);
+        System.out.println();
+        System.exit(0);
+    }
 }
