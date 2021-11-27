@@ -15,16 +15,40 @@ public class Main {
             errorExit("Must have at least one argument", (Object) args);
         }
 
-        Repository repo = new Repository();
+        /* Create a repo or load a saved repo. */
+        Repository repo;
+        if (Repository.REPO_FILE.exists()) {
+            repo = Repository.loadRepo();
+        } else {
+            repo = new Repository();
+        }
+
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
                 repo.init();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
+                validateNumArgs("add", args, 2);
+                String filePathName = args[1];
+                repo.add(filePathName);
                 break;
             // TODO: FILL THE REST IN
+        }
+    }
+
+    /**
+     * Checks the number of arguments versus the expected number,
+     * throws a RuntimeException if they do not match.
+     *
+     * @param cmd Name of command you are validating
+     * @param args Argument array from command line
+     * @param n Number of expected arguments
+     */
+    public static void validateNumArgs(String cmd, String[] args, int n) {
+        if (args.length != n) {
+            throw new RuntimeException(
+                    String.format("Invalid number of arguments for: %s.", cmd));
         }
     }
 }

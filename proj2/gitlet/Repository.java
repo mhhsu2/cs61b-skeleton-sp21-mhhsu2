@@ -1,8 +1,10 @@
 package gitlet;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import static gitlet.Utils.*;
@@ -15,7 +17,7 @@ import static gitlet.Utils.*;
  *
  *  @author TODO
  */
-public class Repository {
+public class Repository implements Serializable {
     /**
      * Instance variables:
      * 1. head: the pointer points at the current branch.
@@ -23,8 +25,8 @@ public class Repository {
      * 2. commits <commitFile, parentFile>: a data structure that stores all the references of commits in this repository.
      */
     private String head;
-    private HashMap<String, File> branches;
-    private HashMap<File, File> commits;
+    private Map<String, File> branches;
+    private Map<File, File> commits;
 
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
@@ -34,6 +36,8 @@ public class Repository {
     public static final File COMMIT_DIR = join(GITLET_DIR, "commits");
     /** The objects directory storing hashed files. */
     public static final File OBJECT_DIR = join(GITLET_DIR, "objects");
+    /** The filename of the repo snapshot instance. */
+    public static final File REPO_FILE = join(GITLET_DIR, "HEAD");
 
     /** Persistence structure.
      * CWD                              <==== Whatever the current working directory is.
@@ -58,6 +62,7 @@ public class Repository {
         commits = new HashMap<>();
     }
 
+    /** Initializes a Gitlet repository. */
     public void init() {
         /* Create .gitlet workspace. */
         if (GITLET_DIR.exists()) {
@@ -77,5 +82,25 @@ public class Repository {
 
         /* Create a branch "master". */
         branches.put("master", initialCommitFile);
+
+        /* Save the state of this repo. */
+        this.saveRepo();
     }
+
+    /** Adds the input file to the staging area. */
+    public void add(String filePathName) {
+        File f = new File(filePathName);
+
+    }
+
+    /** Saves the current state of this repo. */
+    public void saveRepo() {
+        writeObject(REPO_FILE, this);
+    }
+
+    /** Loads a repo instance saved with name "HEAD" in the .gitlet directory. */
+    public static Repository loadRepo() {
+        return readObject(REPO_FILE, Repository.class);
+    }
+
 }
