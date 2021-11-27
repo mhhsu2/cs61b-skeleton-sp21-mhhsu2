@@ -17,7 +17,7 @@ import static gitlet.Utils.*;
  *
  *  @author TODO
  */
-public class Repository implements Serializable {
+public class Repository implements Serializable, Dumpable {
     /**
      * Instance variables:
      * 1. head: the pointer points at the current branch.
@@ -27,6 +27,7 @@ public class Repository implements Serializable {
     private String head;
     private Map<String, File> branches;
     private Map<File, File> commits;
+    private HashMap<String, File> stagingArea;
 
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
@@ -60,6 +61,7 @@ public class Repository implements Serializable {
         head = "master";
         branches = new HashMap<>();
         commits = new HashMap<>();
+        stagingArea = new HashMap<>();
     }
 
     /** Initializes a Gitlet repository. */
@@ -68,10 +70,7 @@ public class Repository implements Serializable {
         if (GITLET_DIR.exists()) {
             errorExit("A Gitlet version-control system already exists in the current directory.");
         }
-        boolean isCreated = GITLET_DIR.mkdir();
-        if (isCreated) {
-            message("A Gitlet version-control system is initialized.");
-        }
+        GITLET_DIR.mkdir();
         COMMIT_DIR.mkdir();
         OBJECT_DIR.mkdir();
 
@@ -89,8 +88,33 @@ public class Repository implements Serializable {
 
     /** Adds the input file to the staging area. */
     public void add(String filePathName) {
-        File f = new File(filePathName);
+        File inputFile = new File(filePathName);
+        if (!inputFile.exists()) {
+            errorExit("File does not exist.");
+        }
 
+        /* Get the content and File of the input file after SHA-1 hash. */
+        byte[] inputContent = readContents(inputFile);
+        File inputBlob = join(OBJECT_DIR, sha1(inputContent));
+
+        /* Get the blobs in the head commit and the corresponding blob of the input file */
+        Commit headCommit = getHeadCommit();
+        HashMap<String, File> headCommitBlobs = headCommit.getBlobs();
+        File prevBlob = headCommitBlobs.get(filePathName);
+
+        if (prevBlob == null) {
+            stageFile(filePathName, inputBlob, inputContent);
+            stagingArea.put(filePathName, inputBlob);
+            return;
+        }
+
+        if (prevBlob.equals(inputBlob)) {
+            System.out.println("Unstage a file");
+            unStageFile(filePathName, inputBlob);
+            return;
+        }
+
+        stageFile(filePathName, inputBlob, inputContent);
     }
 
     /** Saves the current state of this repo. */
@@ -103,4 +127,35 @@ public class Repository implements Serializable {
         return readObject(REPO_FILE, Repository.class);
     }
 
+    @Override
+    public void dump() {
+        System.out.printf("stagingArea.size: %d%n", stagingArea.size());
+    }
+
+    /** Helper methods. */
+
+    /** Returns the File of the head commit. */
+    private File getHeadCommitFile() {
+        return branches.get(head);
+    }
+
+    /** Returns the commit object of the head commit. */
+    private Commit getHeadCommit() {
+        return Commit.loadCommit(getHeadCommitFile());
+    }
+    /** Staged a file into the staging area,
+     *  i.e., add the filename and File object into the staging area
+     *  and saves a blob in OBJECT_DIR.
+     */
+    private void stageFile(String filePathName, File blob, byte[] content) {
+        stagingArea.put(filePathName, blob);
+        writeContents(blob, content);
+        this.saveRepo();
+    }
+
+    private void unStageFile(String filePathName, File blob) {
+        stagingArea.remove(filePathName);
+        blob.delete();
+        this.saveRepo();
+    }
 }

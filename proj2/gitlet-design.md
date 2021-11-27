@@ -54,12 +54,15 @@ This class represents an individual commit.
 
 1. `public static void init()` Initializes a gitlet repository, which setup the main workspace directory `.gitlet`.
 2. `public void add(File f)` Adds file `f` into the stage area.
+3. `public void saveRepo()` Saves the current state of this repo as a serialized file `HEAD`.
+4. `public static Repository loadRepo()` Loads the previous state of the repo from `HEAD`.
 
 ### Commit
 
 1. `public String getHashCode()` Returns the hash code of this object.
 2. `public File saveCommit()` Saves this commit as a persistent file and returns the File object of this commit.
 3. `public File getParentFile()` Returns the File object of the parent of a commit.
+4. `public HashMap<String, File> getBlobs()` Returns the blobs of this commit.
 
 ## Persistence
 
@@ -67,7 +70,7 @@ The directory structure is as follows:
 ```
 CWD                             <==== Whatever the current working directory is.
 └── .gitlet                     <==== All persistant data is stored within here
-    ├── head                    <==== A Repository instance stored as a file
+    ├── HEAD                    <==== A Repository instance stored as a file
     ├── commits                 <==== Where the commits are stored
     ├   ├── commit1             <==== A single Commit instance stored as a file
     ├   ├── ...  
@@ -87,10 +90,12 @@ The `Repository` class will set up all persistence. It will:
 4. Create the `objects` folder if it doesn't exist.
 
 When `gitlet add [file]` is called, we will do:
-1. Check if `[file]` is changed compared to the current `state`.
-   1. If `[file]` differs, store the `serialized [file]` into the `objects` folder and add `[file]` to the `staged area` with its `file address`.
-   2. If `[file]` not differs, do nothing.
-
-
-
-
+1. Calculate the SHA-1 hashcode of the `[file]`. Check if the hashed File exists in the head commit.
+   1. If no, add/update File `[file]` into the staging area. Store the `serialized [file]` into the `objects` folder.
+   2. If yes, check if the hashed File differs from the previous File in the current commit.
+      1. If File `[file]` does not differ from the previous File `[filePrv]`,
+         1. Do not add the File `[file]` and remove the `[file]` if exists the staging area contains previous added File `[file]`.
+      2. If yes,
+         1. Check if the File `[file]` exists in the staging area.
+            1. If yes, update the File `[file]` in the staging area. Store the `serialized [file]` into the `objects` folder.
+            2. If no, add the File `[file]` into the staging area. Store the `serialized [file]` into the `objects` folder.

@@ -25,14 +25,15 @@ public class Commit implements Serializable {
     private String parentId;
     private Date date;
     private String commitMsg;
-    private HashMap<String, String> blobs;
+    private HashMap<String, File> blobs;
 
     Commit() {
         this.date = new Date(0);
         this.commitMsg = "initial commit";
+        this.blobs = new HashMap<>();
     }
 
-    Commit(String parentId, String author, String commitMsg, HashMap<String, String> blobs) {
+    Commit(String parentId, String author, String commitMsg, HashMap<String, File> blobs) {
         this.parentId = parentId;
         this.date = new Date();
         this.commitMsg = commitMsg;
@@ -44,9 +45,14 @@ public class Commit implements Serializable {
      * and returns the File of this commit.
      */
     public File saveCommit() {
-        File commitFile = join(Repository.COMMIT_DIR, this.getHashCode());
+        File commitFile = join(Repository.COMMIT_DIR, getHashCode());
         writeObject(commitFile, this);
         return commitFile;
+    }
+
+    /** Loads a saved commit. */
+    public static Commit loadCommit(File commitFile) {
+        return readObject(commitFile, Commit.class);
     }
 
     /** Returns the hash code of this commit. */
@@ -57,10 +63,15 @@ public class Commit implements Serializable {
 
     /** Returns the File of the parent of this commit*/
     public File getParentFile() {
-        if (this.parentId == null) {
+        if (parentId == null) {
             return null;
         }
 
-        return join(Repository.COMMIT_DIR, this.parentId);
+        return join(Repository.COMMIT_DIR, parentId);
+    }
+
+    /** Returns the blobs of this commit. */
+    public HashMap<String, File> getBlobs() {
+        return blobs;
     }
 }
