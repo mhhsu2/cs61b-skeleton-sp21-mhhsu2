@@ -1,6 +1,10 @@
 package gitlet;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.TreeMap;
+
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -13,29 +17,49 @@ import static gitlet.Utils.*;
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Repository class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided two examples for you.
+     * Instance variables:
+     * 1. head: the pointer points at the current branch.
+     * 2. branches <branchName, commitFile>: a data structure that stores branch names and the head of that branch.
+     * 2. commits <commitFile, parentFile>: a data structure that stores all the references of commits in this repository.
      */
+    private String head;
+    private HashMap<String, File> branches;
+    private HashMap<File, File> commits;
 
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
+    /** The commits directory. */
+    public static final File COMMIT_DIR = join(GITLET_DIR, "commits");
+    /** The objects directory storing hashed files. */
+    public static final File OBJECT_DIR = join(GITLET_DIR, "objects");
 
-    /* TODO: fill in the rest of this class. */
-    /**
-     * Does required filesystem operations to allow for persistence.
-     * (creates any necessary folders or files)
-     * Remember: recommended structure (you do not have to follow):
-     *
-     * .capers/ -- top level folder for all persistent data in your lab12 folder
-     *    - dogs/ -- folder containing all of the persistent data for dogs
-     *    - story -- file containing the current story
+    /** Persistence structure.
+     * CWD                              <==== Whatever the current working directory is.
+     *  └── .gitlet                     <==== All persistant data is stored within here
+     *      ├── repo                    <==== A Repository instance stored as a file
+     *      ├── commits                 <==== Where the commits are stored
+     *      ├   ├── commit1             <==== A single Commit instance stored as a file
+     *      ├   ├── ...
+     *      ├   └── commitN
+     *      ├
+     *      └── objects                 <==== All objects (serialized files) are stored in this directory
+     *          ├── Object1             <==== A single object instance stored to a file
+     *          ├── Object2
+     *          ├── ...
+     *          └── ObjectN
      */
-    public static void init() {
+
+    /** Gitlet repository constructor. */
+    Repository() {
+        head = "master";
+        branches = new HashMap<>();
+        commits = new HashMap<>();
+    }
+
+    public void init() {
+        /* Create .gitlet workspace. */
         if (GITLET_DIR.exists()) {
             errorExit("A Gitlet version-control system already exists in the current directory.");
         }
@@ -43,5 +67,15 @@ public class Repository {
         if (isCreated) {
             message("A Gitlet version-control system is initialized.");
         }
+        COMMIT_DIR.mkdir();
+        OBJECT_DIR.mkdir();
+
+        /* Add the first commit. */
+        Commit initialCommit = new Commit();
+        File initialCommitFile = initialCommit.saveCommit();
+        commits.put(initialCommitFile, initialCommit.getParentFile());
+
+        /* Create a branch "master". */
+        branches.put("master", initialCommitFile);
     }
 }

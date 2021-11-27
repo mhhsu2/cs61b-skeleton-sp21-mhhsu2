@@ -15,10 +15,11 @@ public class Main {
             errorExit("Must have at least one argument", (Object) args);
         }
 
+        Repository repo = new Repository();
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                Repository.init();
+                repo.init();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
