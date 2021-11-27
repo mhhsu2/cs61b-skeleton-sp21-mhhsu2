@@ -22,7 +22,7 @@ public class Commit implements Serializable {
      */
 
     /** The message of this Commit. */
-    private String parentId;
+    private File parentFile;
     private Date date;
     private String commitMsg;
     private HashMap<String, File> blobs;
@@ -33,8 +33,8 @@ public class Commit implements Serializable {
         this.blobs = new HashMap<>();
     }
 
-    Commit(String parentId, String author, String commitMsg, HashMap<String, File> blobs) {
-        this.parentId = parentId;
+    Commit(File parentFile, String author, String commitMsg, HashMap<String, File> blobs) {
+        this.parentFile = parentFile;
         this.date = new Date();
         this.commitMsg = commitMsg;
         this.blobs = blobs;
@@ -63,11 +63,7 @@ public class Commit implements Serializable {
 
     /** Returns the File of the parent of this commit*/
     public File getParentFile() {
-        if (parentId == null) {
-            return null;
-        }
-
-        return join(Repository.COMMIT_DIR, parentId);
+        return parentFile;
     }
 
     /** Returns the blobs of this commit. */
