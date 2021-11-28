@@ -43,6 +43,10 @@ public class Main {
                 String removePathName = args[1];
                 repo.rm(removePathName);
                 break;
+            case "log":
+                validateNumArgs("log", args, 1);
+                repo.log();
+                break;
         }
     }
 

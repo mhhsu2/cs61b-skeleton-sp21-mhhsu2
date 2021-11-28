@@ -167,6 +167,14 @@ public class Repository implements Serializable, Dumpable {
         saveRepo();
     }
 
+    /** Displays the log of the current head commit. */
+    public void log() {
+        Commit curCommit = getHeadCommit();
+        while (curCommit != null) {
+            curCommit.printLog();
+            curCommit = Commit.loadCommit(curCommit.getParentFile());
+        }
+    }
 
     /** Saves the current state of this repo. */
     public void saveRepo() {

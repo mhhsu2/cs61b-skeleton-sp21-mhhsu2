@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import static gitlet.Utils.*;
 
@@ -45,18 +46,21 @@ public class Commit implements Serializable, Dumpable {
      * and returns the File of this commit.
      */
     public File saveCommit() {
-        File commitFile = join(Repository.COMMIT_DIR, getHashCode());
+        File commitFile = join(Repository.COMMIT_DIR, getSha1());
         writeObject(commitFile, this);
         return commitFile;
     }
 
     /** Loads a saved commit. */
     public static Commit loadCommit(File commitFile) {
+        if (commitFile == null) {
+            return null;
+        }
         return readObject(commitFile, Commit.class);
     }
 
     /** Returns the hash code of this commit. */
-    public String getHashCode() {
+    public String getSha1() {
         byte[] serializedCommit = serialize(this);
         return sha1(serializedCommit);
     }
@@ -71,6 +75,19 @@ public class Commit implements Serializable, Dumpable {
         return blobs;
     }
 
+    /** Prints the log od this commit. */
+    public void printLog() {
+        String pattern = "EEE MMM d HH:mm:ss yyyy Z";
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(pattern);
+
+        System.out.println("===");
+        System.out.println("commit " + getSha1());
+        System.out.println("Date: " + dateFormatter.format(date));
+        System.out.println(commitMsg);
+        System.out.println();
+    }
+
+    /** Prints info about this commit by DumpObj class. */
     @Override
     public void dump() {
         System.out.printf("parentFile: %s%ndate: %s%ncommitMsg %s%nblobsKey: %s%n", parentFile, date, commitMsg, blobs.keySet());
