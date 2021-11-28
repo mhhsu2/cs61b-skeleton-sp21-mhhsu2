@@ -70,6 +70,11 @@ public class Commit implements Serializable, Dumpable {
         return parentFile;
     }
 
+    /** Returns the commitMsg of this commit. */
+    public String getCommitMsg() {
+        return commitMsg;
+    }
+
     /** Returns the blobs of this commit. */
     public HashMap<String, File> getBlobs() {
         return blobs;

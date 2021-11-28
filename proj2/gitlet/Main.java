@@ -51,6 +51,15 @@ public class Main {
                 validateNumArgs("global-log", args, 1);
                 repo.globalLog();
                 break;
+            case "find":
+                validateNumArgs("find", args, 2);
+                String searchMsg = args[1];
+                repo.find(searchMsg);
+                break;
+            case "status":
+                validateNumArgs("status", args, 1);
+                repo.status();
+                break;
         }
     }
 

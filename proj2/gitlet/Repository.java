@@ -2,10 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -181,6 +178,91 @@ public class Repository implements Serializable, Dumpable {
         for (File cFile : commits.keySet()) {
             Commit.loadCommit(cFile).printLog();
         }
+    }
+
+    /** Prints the commit IDs of those commits matches
+     * the input commitMsg.
+     */
+    public void find(String searchMsg) {
+        boolean found = false;
+        for (File cFile: commits.keySet()) {
+            String commitMsg = Commit.loadCommit(cFile).getCommitMsg();
+            String commitId = Commit.loadCommit(cFile).getSha1();
+            if (commitMsg.equals(searchMsg)) {
+                System.out.println(commitId);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Found no commit with that message.");
+        }
+    }
+
+    /** Displays what branches currently exist, and marks the current branch with a *.
+     *  Also displays what files have been staged for addition or removal
+     */
+    public void status() {
+        /* Collects sorted branches, staged, and removed files. */
+        ArrayList<String> branchNames = new ArrayList<>(branches.keySet());
+        Collections.sort(branchNames);
+
+        ArrayList<String> stagedFiles = new ArrayList<>(stagingArea.keySet());
+        Collections.sort(stagedFiles);
+        ArrayList<String> addedFiles = new ArrayList<>();
+        ArrayList<String> removedFiles = new ArrayList<>();
+
+        /* Differentiates the files staged to be added or removed. */
+        for (String key : stagedFiles) {
+            if (stagingArea.get(key) == null) { // files staged for removal
+                removedFiles.add(key);
+            } else {
+                addedFiles.add(key);
+            }
+        }
+
+        /* Collects untracked files. */
+        ArrayList<String> untrackedFiles = new ArrayList<>(plainFilenamesIn(CWD)); // All files in the working directory.
+        untrackedFiles.removeAll(getHeadCommit().getBlobs().keySet()); // Removes the files tracked in the head commit.
+        untrackedFiles.removeAll(stagedFiles); // Removes the files added in the staging area.
+        untrackedFiles.addAll(removedFiles); // Adds the files that are staged for removal.
+
+        /* Prints branches. */
+        System.out.println("=== Branches ===");
+        for (String bn : branchNames) {
+            if (bn.equals(head)) {
+                System.out.println("*" + bn);
+            } else {
+                System.out.println(bn);
+            }
+        }
+        System.out.println();
+
+        /* Prints staged files. */
+        System.out.println("=== Staged Files ===");
+        for (String af : addedFiles) {
+            System.out.println(af);
+        }
+        System.out.println();
+
+        /* Prints removed files. */
+        System.out.println("=== Removed Files ===");
+        for (String rf : removedFiles) {
+            System.out.println(rf);
+        }
+        System.out.println();
+
+        /* Prints modification but not staged info. (Not implemented.) */
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        System.out.println();
+
+        /* Prints untracked files. */
+        System.out.println("=== Untracked Files ===");
+        for (String uf : untrackedFiles) {
+            System.out.println(uf);
+        }
+        System.out.println();
+
     }
 
     /** Saves the current state of this repo. */
