@@ -38,6 +38,11 @@ public class Main {
                 String commitMsg = args[1];
                 repo.commit(commitMsg);
                 break;
+            case "rm":
+                validateNumArgs("rm", args, 2);
+                String removePathName = args[1];
+                repo.rm(removePathName);
+                break;
         }
     }
 

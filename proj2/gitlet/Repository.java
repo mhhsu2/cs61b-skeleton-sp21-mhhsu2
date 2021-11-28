@@ -40,6 +40,10 @@ public class Repository implements Serializable, Dumpable {
     /** The filename of the repo snapshot instance. */
     public static final File REPO_FILE = join(GITLET_DIR, "HEAD");
 
+    /** Transient variables */
+    private transient Commit headCommit;
+    private transient HashMap<String, File> headCommitBlobs;
+
     /** Persistence structure.
      * CWD                              <==== Whatever the current working directory is.
      *  └── .gitlet                     <==== All persistant data is stored within here
@@ -98,7 +102,7 @@ public class Repository implements Serializable, Dumpable {
         File inputBlob = join(OBJECT_DIR, sha1(inputContent));
 
         /* Get the blobs in the head commit and the corresponding blob of the input file */
-        Commit headCommit = getHeadCommit();
+        headCommit = getHeadCommit();
         HashMap<String, File> headCommitBlobs = headCommit.getBlobs();
         File prevBlob = headCommitBlobs.get(filePathName);
 
@@ -128,8 +132,11 @@ public class Repository implements Serializable, Dumpable {
         }
 
         /* Updates the head commit with staged files. */
-        HashMap<String, File> headCommitBlobs = getHeadCommit().getBlobs();
+        headCommitBlobs = getHeadCommit().getBlobs();
         headCommitBlobs.putAll(stagingArea);
+
+        /* Removes keys with null values as untracking files. */
+        headCommitBlobs.values().remove(null);
 
         /* Creates a new commit. */
         Commit c = new Commit(getHeadCommitFile(), commitMsg, headCommitBlobs);
@@ -139,6 +146,23 @@ public class Repository implements Serializable, Dumpable {
 
         /* Clears the staging area. */
         stagingArea.clear();
+
+        saveRepo();
+    }
+
+    /** Unstages a tracked file.  */
+    public void rm(String filePathName) {
+        /* Unstages the file if it is added in the staging area. */
+        stagingArea.remove(filePathName);
+
+        /* Stages the file for removal if it exists in the head commit. */
+        headCommitBlobs = getHeadCommit().getBlobs();
+        if (headCommitBlobs.containsKey(filePathName)) {
+            stagingArea.put(filePathName, null);
+        }
+
+        /* Removes the file from the working directory. */
+        restrictedDelete(filePathName);
 
         saveRepo();
     }
@@ -182,7 +206,6 @@ public class Repository implements Serializable, Dumpable {
 
     private void unStageFile(String filePathName, File blob) {
         stagingArea.remove(filePathName);
-        blob.delete();
         saveRepo();
     }
 }
