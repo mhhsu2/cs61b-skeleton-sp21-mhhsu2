@@ -176,6 +176,13 @@ public class Repository implements Serializable, Dumpable {
         }
     }
 
+    /** Displays the logs about all the commits ever made. */
+    public void globalLog() {
+        for (File cFile : commits.keySet()) {
+            Commit.loadCommit(cFile).printLog();
+        }
+    }
+
     /** Saves the current state of this repo. */
     public void saveRepo() {
         writeObject(REPO_FILE, this);
