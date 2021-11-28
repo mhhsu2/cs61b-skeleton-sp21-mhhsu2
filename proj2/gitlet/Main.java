@@ -33,7 +33,11 @@ public class Main {
                 String filePathName = args[1];
                 repo.add(filePathName);
                 break;
-            // TODO: FILL THE REST IN
+            case "commit":
+                validateNumArgs("commit", args, 2);
+                String commitMsg = args[1];
+                repo.commit(commitMsg);
+                break;
         }
     }
 

@@ -12,7 +12,7 @@ import static gitlet.Utils.*;
  *
  *  @author Min-Hsiu Hsu
  */
-public class Commit implements Serializable {
+public class Commit implements Serializable, Dumpable {
     /**
      * Instance variables:
      * 1. parentId: the SHA-1 code of the parent of the current commit.
@@ -33,7 +33,7 @@ public class Commit implements Serializable {
         this.blobs = new HashMap<>();
     }
 
-    Commit(File parentFile, String author, String commitMsg, HashMap<String, File> blobs) {
+    Commit(File parentFile, String commitMsg, HashMap<String, File> blobs) {
         this.parentFile = parentFile;
         this.date = new Date();
         this.commitMsg = commitMsg;
@@ -69,5 +69,10 @@ public class Commit implements Serializable {
     /** Returns the blobs of this commit. */
     public HashMap<String, File> getBlobs() {
         return blobs;
+    }
+
+    @Override
+    public void dump() {
+        System.out.printf("parentFile: %s%ndate: %s%ncommitMsg %s%nblobsKey: %s%n", parentFile, date, commitMsg, blobs.keySet());
     }
 }

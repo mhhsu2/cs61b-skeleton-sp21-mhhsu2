@@ -117,6 +117,33 @@ public class Repository implements Serializable, Dumpable {
         stageFile(filePathName, inputBlob, inputContent);
     }
 
+    /** Saves the current snapshot with staged files as  a commit. */
+    public void commit(String commitMsg) {
+        if (stagingArea.isEmpty()) {
+            errorExit("No changes added to the commit.");
+        }
+
+        if (commitMsg == null) {
+            errorExit("Please enter a commit message.");
+        }
+
+        /* Updates the head commit with staged files. */
+        HashMap<String, File> headCommitBlobs = getHeadCommit().getBlobs();
+        headCommitBlobs.putAll(stagingArea);
+
+        /* Creates a new commit. */
+        Commit c = new Commit(getHeadCommitFile(), commitMsg, headCommitBlobs);
+        File cFile = c.saveCommit();
+        commits.put(cFile, c.getParentFile());
+        branches.put(head, cFile);
+
+        /* Clears the staging area. */
+        stagingArea.clear();
+
+        saveRepo();
+    }
+
+
     /** Saves the current state of this repo. */
     public void saveRepo() {
         writeObject(REPO_FILE, this);
@@ -129,7 +156,7 @@ public class Repository implements Serializable, Dumpable {
 
     @Override
     public void dump() {
-        System.out.printf("stagingArea.size: %d%n", stagingArea.size());
+        System.out.printf("headCommitFile: %s%nstagingAreaKeys: %s%n", branches.get(head), stagingArea.keySet());
     }
 
     /** Helper methods. */
@@ -150,12 +177,12 @@ public class Repository implements Serializable, Dumpable {
     private void stageFile(String filePathName, File blob, byte[] content) {
         stagingArea.put(filePathName, blob);
         writeContents(blob, content);
-        this.saveRepo();
+        saveRepo();
     }
 
     private void unStageFile(String filePathName, File blob) {
         stagingArea.remove(filePathName);
         blob.delete();
-        this.saveRepo();
+        saveRepo();
     }
 }
