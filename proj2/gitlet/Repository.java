@@ -39,7 +39,7 @@ public class Repository implements Serializable, Dumpable {
 
     /** Transient variables */
     private transient Commit headCommit;
-    private transient HashMap<String, File> headCommitBlobs;
+    private transient TreeMap<String, File> headCommitBlobs;
 
     /** Persistence structure.
      * CWD                              <==== Whatever the current working directory is.
@@ -100,7 +100,7 @@ public class Repository implements Serializable, Dumpable {
 
         /* Get the blobs in the head commit and the corresponding blob of the input file */
         headCommit = getHeadCommit();
-        HashMap<String, File> headCommitBlobs = headCommit.getBlobs();
+        headCommitBlobs = headCommit.getBlobs();
         File prevBlob = headCommitBlobs.get(filePathName);
 
         if (prevBlob == null) {
@@ -262,6 +262,49 @@ public class Repository implements Serializable, Dumpable {
             System.out.println(uf);
         }
         System.out.println();
+
+    }
+
+    /** Performs checkouts to a file in the current head commit. */
+    public void checkout(String inputFileName) {
+        headCommitBlobs = getHeadCommit().getBlobs();
+        if (!headCommitBlobs.containsKey(inputFileName)) {
+            errorExit("File does not exist in that commit.");
+        }
+
+        File checkoutFile = join(CWD, inputFileName);
+        byte[] checkoutContent = readContents(headCommitBlobs.get(inputFileName));
+        writeContents(checkoutFile, checkoutContent);
+    }
+
+    /** Performs checkouts to a file in a given commitId. */
+    public void checkout(String inputCommitId, String inputFileName) {
+        List<String> commitIDs = plainFilenamesIn(COMMIT_DIR);
+        boolean containsInputCommit = false;
+        for (String commitId : commitIDs) {
+            if (commitId.startsWith(inputCommitId)) {
+                containsInputCommit = true;
+                inputCommitId = commitId;
+            }
+        }
+
+        if (!containsInputCommit) {
+            errorExit("No commit with that id exists.");
+        }
+
+        Commit inputCommit = Commit.loadCommit(join(COMMIT_DIR, inputCommitId));
+        TreeMap<String, File> inputCommitBlobs = inputCommit.getBlobs();
+        if (!inputCommitBlobs.containsKey(inputFileName)) {
+            errorExit("File does not exist in that commit.");
+        }
+
+        File checkoutFile = join(CWD, inputFileName);
+        byte[] checkoutContent = readContents(inputCommitBlobs.get(inputFileName));
+        writeContents(checkoutFile, checkoutContent);
+    }
+
+    /** Performs checkouts to a given branch. */
+    public void checkoutBranch(String inputBranchName) {
 
     }
 

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
+import java.util.TreeMap;
 import static gitlet.Utils.*;
 
 /** Represents a gitlet commit object.
@@ -26,15 +26,15 @@ public class Commit implements Serializable, Dumpable {
     private File parentFile;
     private Date date;
     private String commitMsg;
-    private HashMap<String, File> blobs;
+    private TreeMap<String, File> blobs;
 
     Commit() {
         this.date = new Date(0);
         this.commitMsg = "initial commit";
-        this.blobs = new HashMap<>();
+        this.blobs = new TreeMap<>();
     }
 
-    Commit(File parentFile, String commitMsg, HashMap<String, File> blobs) {
+    Commit(File parentFile, String commitMsg, TreeMap<String, File> blobs) {
         this.parentFile = parentFile;
         this.date = new Date();
         this.commitMsg = commitMsg;
@@ -76,7 +76,7 @@ public class Commit implements Serializable, Dumpable {
     }
 
     /** Returns the blobs of this commit. */
-    public HashMap<String, File> getBlobs() {
+    public TreeMap<String, File> getBlobs() {
         return blobs;
     }
 

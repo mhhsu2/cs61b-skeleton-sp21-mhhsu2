@@ -60,6 +60,20 @@ public class Main {
                 validateNumArgs("status", args, 1);
                 repo.status();
                 break;
+            case "checkout":
+                String checkoutFileName;
+                String checkoutCommitId;
+                String checkoutBranchName;
+                /* checkout -- [file name] */
+                if (args[1].equals("--")) {
+                    checkoutFileName = args[2];
+                    repo.checkout(checkoutFileName);
+                } else if (args[2].equals("--")) {
+                    checkoutCommitId = args[1];
+                    checkoutFileName = args[3];
+                    repo.checkout(checkoutCommitId, checkoutFileName);
+                }
+                break;
         }
     }
 
