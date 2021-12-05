@@ -37,9 +37,9 @@ public class Repository implements Serializable, Dumpable {
     /** The filename of the repo snapshot instance. */
     public static final File REPO_FILE = join(GITLET_DIR, "HEAD");
 
-    /** Transient variables */
-    private transient Commit headCommit;
     private transient TreeMap<String, File> headCommitBlobs;
+    private transient TreeMap<String, File> inputCommitBlobs;
+    private transient List<String> untrackedFiles;
 
     /** Persistence structure.
      * CWD                              <==== Whatever the current working directory is.
@@ -99,7 +99,8 @@ public class Repository implements Serializable, Dumpable {
         File inputBlob = join(OBJECT_DIR, sha1(inputContent));
 
         /* Get the blobs in the head commit and the corresponding blob of the input file */
-        headCommit = getHeadCommit();
+        /** Transient variables */
+        Commit headCommit = getHeadCommit();
         headCommitBlobs = headCommit.getBlobs();
         File prevBlob = headCommitBlobs.get(filePathName);
 
@@ -264,21 +265,13 @@ public class Repository implements Serializable, Dumpable {
 
     /** Performs checkouts to a file in a given commitId. */
     public void checkout(String inputCommitId, String inputFileName) {
-        List<String> commitIDs = plainFilenamesIn(COMMIT_DIR);
-        boolean containsInputCommit = false;
-        for (String commitId : commitIDs) {
-            if (commitId.startsWith(inputCommitId)) {
-                containsInputCommit = true;
-                inputCommitId = commitId;
-            }
-        }
-
-        if (!containsInputCommit) {
+        inputCommitId = searchCommitId(inputCommitId);
+        if (inputCommitId == null) {
             errorExit("No commit with that id exists.");
         }
 
         Commit inputCommit = Commit.loadCommit(join(COMMIT_DIR, inputCommitId));
-        TreeMap<String, File> inputCommitBlobs = inputCommit.getBlobs();
+        inputCommitBlobs = inputCommit.getBlobs();
         if (!inputCommitBlobs.containsKey(inputFileName)) {
             errorExit("File does not exist in that commit.");
         }
@@ -299,22 +292,13 @@ public class Repository implements Serializable, Dumpable {
         }
 
         /* Makes sure no untracked file is overwritten. */
-        List<String> stagedFiles = getStagedFiles();
-        List<String> untrackedFiles = getUntrackedFiles(stagedFiles, getRemovedFiles(stagedFiles));
-        Commit givenCommit = Commit.loadCommit(branches.get(inputBranchName));
-        TreeMap<String, File> givenCommitBlobs = givenCommit.getBlobs();
-
-        for (String u: untrackedFiles) {
-            if (givenCommitBlobs.containsKey(u)) {
-                errorExit("There is an untracked file in the way; delete it, or add and commit it first.");
-            }
-        }
+        overwrittenHelper(inputBranchName);
 
         /* Sets the HEAD to be the head commit of the given branch. */
         head = inputBranchName;
 
         /* Overwrites/checkouts a file to the given branch (the new head commit.) */
-        for (String fileName : givenCommitBlobs.keySet()) {
+        for (String fileName : inputCommitBlobs.keySet()) {
             checkout(fileName);
         }
 
@@ -323,7 +307,7 @@ public class Repository implements Serializable, Dumpable {
         trackedFiles.removeAll(untrackedFiles);
 
         for (String tf : trackedFiles) {
-            if (!givenCommitBlobs.containsKey(tf)) {
+            if (!inputCommitBlobs.containsKey(tf)) {
                 File rf = join(CWD, tf);
                 rf.delete();
             }
@@ -356,6 +340,29 @@ public class Repository implements Serializable, Dumpable {
         }
 
         branches.remove(inputBranchName);
+
+        saveRepo();
+    }
+
+    /** Checks out all the files tracked by the given commit. */
+    public void reset(String inputCommitId) {
+        inputCommitId = searchCommitId(inputCommitId);
+        if (inputCommitId == null) {
+            errorExit("No commit with that id exists.");
+        }
+
+        /* Moves the head commit to the given commit. */
+        String curBranch = head;
+        branches.put(curBranch, join(COMMIT_DIR, inputCommitId));
+
+        /* Makes sure no untracked file is going to be overwritten. */
+        overwrittenHelper(curBranch);
+
+        /* Creates a dummy branch. */
+        branch("dummy");
+        checkoutBranch("dummy");
+        head = curBranch;
+        removeBranch("dummy");
 
         saveRepo();
     }
@@ -440,5 +447,33 @@ public class Repository implements Serializable, Dumpable {
         untrackedFiles.addAll(removedFiles); // Adds the files that are staged for removal.
 
         return untrackedFiles;
+    }
+
+    /** Returns true if a commitId exists.
+     * False, if it does not exist.
+     */
+    private String searchCommitId(String inputCommitId) {
+        List<String> commitIDs = plainFilenamesIn(COMMIT_DIR);
+        for (String commitId : commitIDs) {
+            if (commitId.startsWith(inputCommitId)) {
+                return commitId;
+
+            }
+        }
+        return null;
+    }
+
+    /** Makes sure no untracked file is overwritten. */
+    private void overwrittenHelper(String inputBranchName) {
+        List<String> stagedFiles = getStagedFiles();
+        untrackedFiles = getUntrackedFiles(stagedFiles, getRemovedFiles(stagedFiles));
+        Commit givenCommit = Commit.loadCommit(branches.get(inputBranchName));
+        inputCommitBlobs = givenCommit.getBlobs();
+
+        for (String u: untrackedFiles) {
+            if (inputCommitBlobs.containsKey(u)) {
+                errorExit("There is an untracked file in the way; delete it, or add and commit it first.");
+            }
+        }
     }
 }

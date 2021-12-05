@@ -88,6 +88,12 @@ public class Main {
                 validateNumArgs("rm-branch", args, 2);
                 String removeBranchName = args[1];
                 repo.removeBranch(removeBranchName);
+                break;
+            case "reset":
+                validateNumArgs("reset", args, 2);
+                String resetCommitId = args[1];
+                repo.reset(resetCommitId);
+                break;
         }
     }
 
