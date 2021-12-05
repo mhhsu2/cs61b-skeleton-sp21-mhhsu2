@@ -207,25 +207,10 @@ public class Repository implements Serializable, Dumpable {
         ArrayList<String> branchNames = new ArrayList<>(branches.keySet());
         Collections.sort(branchNames);
 
-        ArrayList<String> stagedFiles = new ArrayList<>(stagingArea.keySet());
-        Collections.sort(stagedFiles);
-        ArrayList<String> addedFiles = new ArrayList<>();
-        ArrayList<String> removedFiles = new ArrayList<>();
-
-        /* Differentiates the files staged to be added or removed. */
-        for (String key : stagedFiles) {
-            if (stagingArea.get(key) == null) { // files staged for removal
-                removedFiles.add(key);
-            } else {
-                addedFiles.add(key);
-            }
-        }
-
-        /* Collects untracked files. */
-        ArrayList<String> untrackedFiles = new ArrayList<>(plainFilenamesIn(CWD)); // All files in the working directory.
-        untrackedFiles.removeAll(getHeadCommit().getBlobs().keySet()); // Removes the files tracked in the head commit.
-        untrackedFiles.removeAll(stagedFiles); // Removes the files added in the staging area.
-        untrackedFiles.addAll(removedFiles); // Adds the files that are staged for removal.
+        List<String> stagedFiles = getStagedFiles();
+        List<String> addedFiles = getAddedFiles(stagedFiles);
+        List<String> removedFiles = getRemovedFiles(stagedFiles);
+        List<String> untrackedFiles = getUntrackedFiles(stagedFiles, removedFiles);
 
         /* Prints branches. */
         System.out.println("=== Branches ===");
@@ -305,7 +290,74 @@ public class Repository implements Serializable, Dumpable {
 
     /** Performs checkouts to a given branch. */
     public void checkoutBranch(String inputBranchName) {
+        if (!branches.containsKey(inputBranchName)) {
+            errorExit("No such branch exists.");
+        }
 
+        if (head.equals(inputBranchName)) {
+            errorExit("No need to checkout the current branch.");
+        }
+
+        /* Makes sure no untracked file is overwritten. */
+        List<String> stagedFiles = getStagedFiles();
+        List<String> untrackedFiles = getUntrackedFiles(stagedFiles, getRemovedFiles(stagedFiles));
+        Commit givenCommit = Commit.loadCommit(branches.get(inputBranchName));
+        TreeMap<String, File> givenCommitBlobs = givenCommit.getBlobs();
+
+        for (String u: untrackedFiles) {
+            if (givenCommitBlobs.containsKey(u)) {
+                errorExit("There is an untracked file in the way; delete it, or add and commit it first.");
+            }
+        }
+
+        /* Sets the HEAD to be the head commit of the given branch. */
+        head = inputBranchName;
+
+        /* Overwrites/checkouts a file to the given branch (the new head commit.) */
+        for (String fileName : givenCommitBlobs.keySet()) {
+            checkout(fileName);
+        }
+
+        /* Removes the files tracked in the current branch but not present in the given branch */
+        List<String> trackedFiles = new ArrayList<>(plainFilenamesIn(CWD));
+        trackedFiles.removeAll(untrackedFiles);
+
+        for (String tf : trackedFiles) {
+            if (!givenCommitBlobs.containsKey(tf)) {
+                File rf = join(CWD, tf);
+                rf.delete();
+            }
+        }
+
+        /* Clears the staging area. */
+        stagingArea.clear();
+
+        saveRepo();
+    }
+
+    /** Creates a new branch in this repo. */
+    public void branch(String inputBranchName) {
+        if (branches.containsKey(inputBranchName)) {
+            errorExit("A branch with that name already exists.");
+        }
+
+        branches.put(inputBranchName, getHeadCommitFile());
+        saveRepo();
+    }
+
+    /** Deletes a branch. */
+    public void removeBranch(String inputBranchName) {
+        if (!branches.containsKey(inputBranchName)) {
+            errorExit("A branch with that name does not exist.");
+        }
+
+        if (head.equals(inputBranchName)) {
+            errorExit("Cannot remove the current branch.");
+        }
+
+        branches.remove(inputBranchName);
+
+        saveRepo();
     }
 
     /** Saves the current state of this repo. */
@@ -347,5 +399,46 @@ public class Repository implements Serializable, Dumpable {
     private void unStageFile(String filePathName, File blob) {
         stagingArea.remove(filePathName);
         saveRepo();
+    }
+
+    /** Gets staged files. */
+    private List<String> getStagedFiles() {
+        ArrayList<String> stagedFiles = new ArrayList<>(stagingArea.keySet());
+        Collections.sort(stagedFiles);
+        return stagedFiles;
+    }
+
+    /** Gets added files. */
+    private List<String> getAddedFiles(List<String> stagedFiles) {
+        ArrayList<String> addedFiles = new ArrayList<>();
+        /* Differentiates the files staged to be added or removed. */
+        for (String key : stagedFiles) {
+            if (stagingArea.get(key) != null) { // files staged for removal
+                addedFiles.add(key);
+            }
+        }
+        return addedFiles;
+    }
+
+    /** Gets removed files. */
+    private List<String> getRemovedFiles(List<String> stagedFiles) {
+        ArrayList<String> removedFiles = new ArrayList<>();
+        /* Differentiates the files staged to be added or removed. */
+        for (String key : stagedFiles) {
+            if (stagingArea.get(key) == null) { // files staged for removal
+                removedFiles.add(key);
+            }
+        }
+        return removedFiles;
+    }
+
+    /** Collects untracked files. */
+    private List<String> getUntrackedFiles(List<String> stagedFiles, List<String> removedFiles) {
+        ArrayList<String> untrackedFiles = new ArrayList<>(plainFilenamesIn(CWD)); // All files in the working directory.
+        untrackedFiles.removeAll(getHeadCommit().getBlobs().keySet()); // Removes the files tracked in the head commit.
+        untrackedFiles.removeAll(stagedFiles); // Removes the files added in the staging area.
+        untrackedFiles.addAll(removedFiles); // Adds the files that are staged for removal.
+
+        return untrackedFiles;
     }
 }

@@ -65,15 +65,29 @@ public class Main {
                 String checkoutCommitId;
                 String checkoutBranchName;
                 /* checkout -- [file name] */
-                if (args[1].equals("--")) {
+                if (args.length == 2) {
+                    checkoutBranchName = args[1];
+                    repo.checkoutBranch(checkoutBranchName);
+                } else if (args[1].equals("--")) {
                     checkoutFileName = args[2];
                     repo.checkout(checkoutFileName);
                 } else if (args[2].equals("--")) {
                     checkoutCommitId = args[1];
                     checkoutFileName = args[3];
                     repo.checkout(checkoutCommitId, checkoutFileName);
+                } else {
+                    errorExit("Please check the usage of checkout command.");
                 }
                 break;
+            case "branch":
+                validateNumArgs("branch", args, 2);
+                String inputBranchName = args[1];
+                repo.branch(inputBranchName);
+                break;
+            case "rm-branch":
+                validateNumArgs("rm-branch", args, 2);
+                String removeBranchName = args[1];
+                repo.removeBranch(removeBranchName);
         }
     }
 
