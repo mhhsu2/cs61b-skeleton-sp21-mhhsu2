@@ -94,6 +94,11 @@ public class Main {
                 String resetCommitId = args[1];
                 repo.reset(resetCommitId);
                 break;
+            case "merge":
+                validateNumArgs("merge", args, 2);
+                String mergeBranchName = args[1];
+                repo.merge(mergeBranchName);
+                break;
         }
     }
 

@@ -111,7 +111,6 @@ public class Repository implements Serializable, Dumpable {
         }
 
         if (prevBlob.equals(inputBlob)) {
-            System.out.println("Unstage a file");
             unStageFile(filePathName, inputBlob);
             return;
         }
@@ -367,6 +366,88 @@ public class Repository implements Serializable, Dumpable {
         saveRepo();
     }
 
+    /** Merge the current branch with a given branch. */
+    public void merge(String inputBranchName) {
+        File curHeadCommitFile = branches.get(head);
+        File givenHeadCommitFile = branches.get(inputBranchName);
+        File splitCommitFile = findLatestSplitCommit(curHeadCommitFile, givenHeadCommitFile);
+
+        String givenHeadCommitId = Commit.loadCommit(givenHeadCommitFile).getSha1();
+
+        /* Given branch is an ancestor of the current branch. */
+        if (splitCommitFile.equals(givenHeadCommitFile)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            return;
+        }
+
+        /* Current branch fast-forwarded. */
+        if (splitCommitFile.equals(curHeadCommitFile)) {
+            checkoutBranch(inputBranchName);
+            System.out.println("Current branch fast-forwarded.");
+            return;
+        }
+
+        /* Gets all files in the three commits. */
+        TreeMap<String, File> curHeadCommitBlobs = Commit.loadCommit(curHeadCommitFile).getBlobs();
+        TreeMap<String, File> givenHeadCommitBlobs = Commit.loadCommit(givenHeadCommitFile).getBlobs();
+        TreeMap<String, File> splitCommitBlobs = Commit.loadCommit(splitCommitFile).getBlobs();
+        Set<String> unionFileNames = new HashSet<>();
+        unionFileNames.addAll(curHeadCommitBlobs.keySet());
+        unionFileNames.addAll(givenHeadCommitBlobs.keySet());
+        unionFileNames.addAll(splitCommitBlobs.keySet());
+
+        boolean isInConflict = false;
+
+        for (String n : unionFileNames) {
+            /* Checks the presence of a file in the above three commits. */
+            Boolean existsCur = curHeadCommitBlobs.containsKey(n);
+            Boolean existsGiven = givenHeadCommitBlobs.containsKey(n);
+            Boolean existsSplit = splitCommitBlobs.containsKey(n);
+
+            if (existsSplit && existsCur && existsGiven) {
+                if (splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))) {
+                    checkout(givenHeadCommitId, n);
+                    add(n);
+                }
+            } else if (!existsSplit && !existsCur && existsGiven) {
+                checkout(givenHeadCommitId, n);
+                add(n);
+            } else if (existsSplit && existsCur && !existsGiven) {
+                if (splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))) {
+                    rm(n);
+                } else {
+                    mergeConflict(n, curHeadCommitBlobs.get(n), givenHeadCommitBlobs.get(n));
+                    add(n);
+                    isInConflict = true;
+                }
+            } else if (!existsSplit && existsCur && existsGiven) {
+                if (!curHeadCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
+                    mergeConflict(n, curHeadCommitBlobs.get(n), givenHeadCommitBlobs.get(n));
+                    add(n);
+                    isInConflict = true;
+                }
+            } else if (existsSplit && !existsCur && existsGiven) {
+                if (!splitCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
+                    mergeConflict(n, curHeadCommitBlobs.get(n), givenHeadCommitBlobs.get(n));
+                    add(n);
+                    isInConflict = true;
+                }
+            }
+        }
+
+
+        String commitMsg = "Merged [" +
+                inputBranchName +
+                "] into [" +
+                head;
+
+        commit(commitMsg);
+
+        if (isInConflict) {
+            System.out.println("Encountered a merge conflict.");
+        }
+    }
+
     /** Saves the current state of this repo. */
     public void saveRepo() {
         writeObject(REPO_FILE, this);
@@ -408,14 +489,14 @@ public class Repository implements Serializable, Dumpable {
         saveRepo();
     }
 
-    /** Gets staged files. */
+    /** Returns current staged files. */
     private List<String> getStagedFiles() {
         ArrayList<String> stagedFiles = new ArrayList<>(stagingArea.keySet());
         Collections.sort(stagedFiles);
         return stagedFiles;
     }
 
-    /** Gets added files. */
+    /** Returns current added files. */
     private List<String> getAddedFiles(List<String> stagedFiles) {
         ArrayList<String> addedFiles = new ArrayList<>();
         /* Differentiates the files staged to be added or removed. */
@@ -427,7 +508,7 @@ public class Repository implements Serializable, Dumpable {
         return addedFiles;
     }
 
-    /** Gets removed files. */
+    /** Returns current removed files. */
     private List<String> getRemovedFiles(List<String> stagedFiles) {
         ArrayList<String> removedFiles = new ArrayList<>();
         /* Differentiates the files staged to be added or removed. */
@@ -439,7 +520,7 @@ public class Repository implements Serializable, Dumpable {
         return removedFiles;
     }
 
-    /** Collects untracked files. */
+    /** Returns current untracked files. */
     private List<String> getUntrackedFiles(List<String> stagedFiles, List<String> removedFiles) {
         ArrayList<String> untrackedFiles = new ArrayList<>(plainFilenamesIn(CWD)); // All files in the working directory.
         untrackedFiles.removeAll(getHeadCommit().getBlobs().keySet()); // Removes the files tracked in the head commit.
@@ -463,7 +544,10 @@ public class Repository implements Serializable, Dumpable {
         return null;
     }
 
-    /** Makes sure no untracked file is overwritten. */
+    /** Makes sure no untracked file is overwritten.
+     * And, sets the untrackedFiles and inputCommitBlobs
+     * for checkoutBranch method.
+     */
     private void overwrittenHelper(String inputBranchName) {
         List<String> stagedFiles = getStagedFiles();
         untrackedFiles = getUntrackedFiles(stagedFiles, getRemovedFiles(stagedFiles));
@@ -475,5 +559,42 @@ public class Repository implements Serializable, Dumpable {
                 errorExit("There is an untracked file in the way; delete it, or add and commit it first.");
             }
         }
+    }
+
+    /** Returns the latest split commitFile for two branches. */
+    private File findLatestSplitCommit(File headCommitFileA, File headCommitFileB) {
+        Set<File> pSetA = new HashSet<>();
+
+        for (File a = headCommitFileA; commits.get(a) != null; a = commits.get(a)) {
+            pSetA.add(a);
+        }
+
+        for (File b = headCommitFileB; commits.get(b) != null; b = commits.get(b)) {
+            if (pSetA.contains(b)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    /** Combines two file contents when merging in conflict. */
+    private void mergeConflict(String filePathName, File curFile, File givenFile) {
+        String curContent = "";
+        String givenContent = "";
+        if (curFile != null) {
+            curContent = readContentsAsString(curFile);
+        }
+
+        if (givenFile != null) {
+            givenContent = readContentsAsString(givenFile);
+        }
+
+        String mergedContent = "<<<<<<< HEAD\n" +
+                curContent +
+                "=======\n" +
+                givenContent +
+                ">>>>>>>";
+
+        writeContents(join(CWD, filePathName), mergedContent);
     }
 }
