@@ -380,7 +380,7 @@ public class Repository implements Serializable, Dumpable {
 
         /* Given branch is an ancestor of the current branch. */
         if (splitCommitFile.equals(givenHeadCommitFile)) {
-            System.out.println("Given branch is an ancestor of the current branch.");
+            System.out.println("Cannot merge a branch with itself.");
             return;
         }
 
@@ -586,11 +586,11 @@ public class Repository implements Serializable, Dumpable {
     private File findLatestSplitCommit(File headCommitFileA, File headCommitFileB) {
         Set<File> pSetA = new HashSet<>();
 
-        for (File a = headCommitFileA; commits.get(a) != null; a = commits.get(a)) {
+        for (File a = headCommitFileA; a != null; a = commits.get(a)) {
             pSetA.add(a);
         }
 
-        for (File b = headCommitFileB; commits.get(b) != null; b = commits.get(b)) {
+        for (File b = headCommitFileB; b != null; b = commits.get(b)) {
             if (pSetA.contains(b)) {
                 return b;
             }
