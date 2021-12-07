@@ -7,10 +7,10 @@ import java.text.SimpleDateFormat;
 import java.util.TreeMap;
 import static gitlet.Utils.*;
 
-/** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
+/** Represents a Gitlet commit object.
+ *  A commit object persistently stores the data
+ *  for a git commit, which can be saved and loaded
+ *  from disk.
  *  @author Min-Hsiu Hsu
  */
 public class Commit implements Serializable, Dumpable {
@@ -95,6 +95,7 @@ public class Commit implements Serializable, Dumpable {
     /** Prints info about this commit by DumpObj class. */
     @Override
     public void dump() {
-        System.out.printf("parentFile: %s%ndate: %s%ncommitMsg %s%nblobsKey: %s%n", parentFile, date, commitMsg, blobs.keySet());
+        System.out.printf("parentFile: %s%ndate: %s%ncommitMsg %s%nblobsKey: %s%n",
+                parentFile, date, commitMsg, blobs.keySet());
     }
 }

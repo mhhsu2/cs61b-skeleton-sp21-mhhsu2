@@ -6,20 +6,20 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
-
-/** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
+/** Represents a Gitlet repository.
+ * A Repository object persistently stores
+ * the data in a Git repository and performs
+ * various operations as in the real Git repository.
+ *  @author Min-Hsiu Hsu
  */
 public class Repository implements Serializable, Dumpable {
     /**
      * Instance variables:
      * 1. head: the pointer points at the current branch.
-     * 2. branches <branchName, commitFile>: a data structure that stores branch names and the head of that branch.
-     * 2. commits <commitFile, parentFile>: a data structure that stores all the references of commits in this repository.
+     * 2. branches <branchName, commitFile>:
+     *      a data structure that stores branch names and the head of that branch.
+     * 2. commits <commitFile, parentFile>:
+     *      a data structure that stores all the references of commits in this repository.
      */
     private String head;
     private Map<String, File> branches;
@@ -50,7 +50,7 @@ public class Repository implements Serializable, Dumpable {
      *      ├   ├── ...
      *      ├   └── commitN
      *      ├
-     *      └── objects                 <==== All objects (serialized files) are stored in this directory
+     *      └── objects                 <==== All serialized files are stored in this directory
      *          ├── Object1             <==== A single object instance stored to a file
      *          ├── Object2
      *          ├── ...
@@ -124,7 +124,7 @@ public class Repository implements Serializable, Dumpable {
             errorExit("No changes added to the commit.");
         }
 
-        if (commitMsg == null) {
+        if (commitMsg == null || commitMsg.equals("")) {
             errorExit("Please enter a commit message.");
         }
 
@@ -149,6 +149,12 @@ public class Repository implements Serializable, Dumpable {
 
     /** Unstages a tracked file.  */
     public void rm(String filePathName) {
+        boolean isStaged = stagingArea.containsKey(filePathName);
+        boolean isTracked = getHeadCommit().getBlobs().containsKey(filePathName);
+        if (!isStaged && !isTracked) {
+            errorExit("No reason to remove the file.");
+        }
+
         /* Unstages the file if it is added in the staging area. */
         stagingArea.remove(filePathName);
 
@@ -210,7 +216,7 @@ public class Repository implements Serializable, Dumpable {
         List<String> stagedFiles = getStagedFiles();
         List<String> addedFiles = getAddedFiles(stagedFiles);
         List<String> removedFiles = getRemovedFiles(stagedFiles);
-        List<String> untrackedFiles = getUntrackedFiles(stagedFiles, removedFiles);
+        untrackedFiles = getUntrackedFiles(stagedFiles, removedFiles);
 
         /* Prints branches. */
         System.out.println("=== Branches ===");
@@ -388,9 +394,12 @@ public class Repository implements Serializable, Dumpable {
         }
 
         /* Gets all files in the three commits. */
-        TreeMap<String, File> curHeadCommitBlobs = Commit.loadCommit(curHeadCommitFile).getBlobs();
-        TreeMap<String, File> givenHeadCommitBlobs = Commit.loadCommit(givenHeadCommitFile).getBlobs();
-        TreeMap<String, File> splitCommitBlobs = Commit.loadCommit(splitCommitFile).getBlobs();
+        TreeMap<String, File> curHeadCommitBlobs =
+                Commit.loadCommit(curHeadCommitFile).getBlobs();
+        TreeMap<String, File> givenHeadCommitBlobs =
+                Commit.loadCommit(givenHeadCommitFile).getBlobs();
+        TreeMap<String, File> splitCommitBlobs =
+                Commit.loadCommit(splitCommitFile).getBlobs();
         Set<String> unionFileNames = new HashSet<>();
         unionFileNames.addAll(curHeadCommitBlobs.keySet());
         unionFileNames.addAll(givenHeadCommitBlobs.keySet());
@@ -436,10 +445,7 @@ public class Repository implements Serializable, Dumpable {
         }
 
 
-        String commitMsg = "Merged [" +
-                inputBranchName +
-                "] into [" +
-                head;
+        String commitMsg = "Merged " + inputBranchName + " into " + head + "\\.";
 
         commit(commitMsg);
 
@@ -460,7 +466,9 @@ public class Repository implements Serializable, Dumpable {
 
     @Override
     public void dump() {
-        System.out.printf("headCommitFile: %s%nstagingAreaKeys: %s%n", branches.get(head), stagingArea.keySet());
+        System.out.printf("headCommitFile: %s%nstagingAreaKeys: %s%n",
+                branches.get(head),
+                stagingArea.keySet());
     }
 
     /** Helper methods. */
@@ -522,12 +530,16 @@ public class Repository implements Serializable, Dumpable {
 
     /** Returns current untracked files. */
     private List<String> getUntrackedFiles(List<String> stagedFiles, List<String> removedFiles) {
-        ArrayList<String> untrackedFiles = new ArrayList<>(plainFilenamesIn(CWD)); // All files in the working directory.
-        untrackedFiles.removeAll(getHeadCommit().getBlobs().keySet()); // Removes the files tracked in the head commit.
-        untrackedFiles.removeAll(stagedFiles); // Removes the files added in the staging area.
-        untrackedFiles.addAll(removedFiles); // Adds the files that are staged for removal.
+        /* All files in the working directory. */
+        ArrayList<String> outFiles = new ArrayList<>(plainFilenamesIn(CWD));
+        /* Removes the files tracked in the head commit. */
+        outFiles.removeAll(getHeadCommit().getBlobs().keySet());
+        /* Removes the files added in the staging area. */
+        outFiles.removeAll(stagedFiles);
+        /* Adds the files that are staged for removal. */
+        outFiles.addAll(removedFiles);
 
-        return untrackedFiles;
+        return outFiles;
     }
 
     /** Returns true if a commitId exists.
@@ -589,11 +601,11 @@ public class Repository implements Serializable, Dumpable {
             givenContent = readContentsAsString(givenFile);
         }
 
-        String mergedContent = "<<<<<<< HEAD\n" +
-                curContent +
-                "=======\n" +
-                givenContent +
-                ">>>>>>>";
+        String mergedContent = "<<<<<<< HEAD\n"
+                + curContent
+                + "=======\n"
+                + givenContent
+                + ">>>>>>>";
 
         writeContents(join(CWD, filePathName), mergedContent);
     }

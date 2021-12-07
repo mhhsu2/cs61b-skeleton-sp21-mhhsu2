@@ -76,7 +76,7 @@ public class Main {
                     checkoutFileName = args[3];
                     repo.checkout(checkoutCommitId, checkoutFileName);
                 } else {
-                    errorExit("Please check the usage of checkout command.");
+                    errorExit("Incorrect operands.");
                 }
                 break;
             case "branch":
