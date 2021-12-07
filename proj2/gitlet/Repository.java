@@ -532,12 +532,15 @@ public class Repository implements Serializable, Dumpable {
     private List<String> getUntrackedFiles(List<String> stagedFiles, List<String> removedFiles) {
         /* All files in the working directory. */
         ArrayList<String> outFiles = new ArrayList<>(plainFilenamesIn(CWD));
+        /* Collects the files that are staged for removal. */
+        ArrayList<String> recreatedFiles = new ArrayList<>(removedFiles);
+        recreatedFiles.retainAll(outFiles);
         /* Removes the files tracked in the head commit. */
         outFiles.removeAll(getHeadCommit().getBlobs().keySet());
         /* Removes the files added in the staging area. */
         outFiles.removeAll(stagedFiles);
-        /* Adds the files that are staged for removal. */
-        outFiles.addAll(removedFiles);
+        /* Adds the files that are staged for removal but then recreated. */
+        outFiles.addAll(recreatedFiles);
 
         return outFiles;
     }
