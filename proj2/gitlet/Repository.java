@@ -412,9 +412,17 @@ public class Repository implements Serializable, Dumpable {
             Boolean existsSplit = splitCommitBlobs.containsKey(n);
 
             if (existsSplit && existsCur && existsGiven) {
-                if (splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))) {
+                if (splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))
+                && !splitCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
                     checkout(givenHeadCommitId, n);
                     add(n);
+                }
+
+                if (!splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))
+                        && !splitCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
+                    mergeConflict(n, curHeadCommitBlobs.get(n), givenHeadCommitBlobs.get(n));
+                    add(n);
+                    isInConflict = true;
                 }
             } else if (!existsSplit && !existsCur && existsGiven) {
                 checkout(givenHeadCommitId, n);
