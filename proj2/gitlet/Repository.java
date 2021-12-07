@@ -159,13 +159,11 @@ public class Repository implements Serializable, Dumpable {
         stagingArea.remove(filePathName);
 
         /* Stages the file for removal if it exists in the head commit. */
-        headCommitBlobs = getHeadCommit().getBlobs();
-        if (headCommitBlobs.containsKey(filePathName)) {
+        if (isTracked) {
             stagingArea.put(filePathName, null);
+            /* Removes the file from the working directory. */
+            restrictedDelete(filePathName);
         }
-
-        /* Removes the file from the working directory. */
-        restrictedDelete(filePathName);
 
         saveRepo();
     }
