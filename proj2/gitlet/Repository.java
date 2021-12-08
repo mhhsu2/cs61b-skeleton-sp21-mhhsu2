@@ -295,7 +295,7 @@ public class Repository implements Serializable, Dumpable {
         }
 
         /* Makes sure no untracked file is overwritten. */
-        overwrittenHelper(inputBranchName);
+        overwrittenHelper(branches.get(inputBranchName));
 
         /* Sets the HEAD to be the head commit of the given branch. */
         head = inputBranchName;
@@ -354,16 +354,27 @@ public class Repository implements Serializable, Dumpable {
             errorExit("No commit with that id exists.");
         }
 
-        /* Moves the head commit to the given commit. */
-        String curBranch = head;
-        branches.put(curBranch, join(COMMIT_DIR, inputCommitId));
+        /* Makes sure no untracked file is going to be overwritten.
+        * After this, we are sure we can successfully reset a commit.
+        * So, we can change the persistence of this repo.
+        */
+        File inputCommitFile = join(COMMIT_DIR, inputCommitId);
+        overwrittenHelper(inputCommitFile);
 
-        /* Makes sure no untracked file is going to be overwritten. */
-        overwrittenHelper(curBranch);
+
 
         /* Creates a dummy branch. */
         branch("dummy");
-        checkoutBranch("dummy");
+
+        /* Moves the head commit to the given commit. */
+        String curBranch = head;
+        branches.put(curBranch, inputCommitFile);
+
+        /* Moves head to "dummy" to work around the failure case of checkout. */
+        head = "dummy";
+        checkoutBranch(curBranch);
+
+        /* Removes the dummy branch. */
         head = curBranch;
         removeBranch("dummy");
 
@@ -451,7 +462,7 @@ public class Repository implements Serializable, Dumpable {
         }
 
 
-        String commitMsg = "Merged " + inputBranchName + " into " + head + "\\.";
+        String commitMsg = "Merged " + inputBranchName + " into " + head;
 
         commit(commitMsg);
 
@@ -569,10 +580,10 @@ public class Repository implements Serializable, Dumpable {
      * And, sets the untrackedFiles and inputCommitBlobs
      * for checkoutBranch method.
      */
-    private void overwrittenHelper(String inputBranchName) {
+    private void overwrittenHelper(File givenCommitFile) {
         List<String> stagedFiles = getStagedFiles();
         untrackedFiles = getUntrackedFiles(stagedFiles, getRemovedFiles(stagedFiles));
-        Commit givenCommit = Commit.loadCommit(branches.get(inputBranchName));
+        Commit givenCommit = Commit.loadCommit(givenCommitFile);
         inputCommitBlobs = givenCommit.getBlobs();
 
         for (String u: untrackedFiles) {
