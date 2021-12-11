@@ -99,6 +99,8 @@ public class Main {
                 String mergeBranchName = args[1];
                 repo.merge(mergeBranchName);
                 break;
+            default:
+                errorExit("No command with that name exists.");
         }
     }
 

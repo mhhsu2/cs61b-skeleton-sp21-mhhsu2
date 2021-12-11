@@ -207,6 +207,10 @@ public class Repository implements Serializable, Dumpable {
      *  Also displays what files have been staged for addition or removal
      */
     public void status() {
+        if (!GITLET_DIR.exists()) {
+            errorExit("Not in an initialized Gitlet directory.");
+        }
+
         /* Collects sorted branches, staged, and removed files. */
         ArrayList<String> branchNames = new ArrayList<>(branches.keySet());
         Collections.sort(branchNames);
@@ -385,7 +389,8 @@ public class Repository implements Serializable, Dumpable {
     public void merge(String inputBranchName) {
         File curHeadCommitFile = branches.get(head);
         File givenHeadCommitFile = branches.get(inputBranchName);
-        File splitCommitFile = findLatestSplitCommit(curHeadCommitFile, givenHeadCommitFile);
+        File splitCommitFile = findLatestSplitCommit(curHeadCommitFile,
+                givenHeadCommitFile);
 
         String givenHeadCommitId = Commit.loadCommit(givenHeadCommitFile).getSha1();
 
@@ -424,7 +429,7 @@ public class Repository implements Serializable, Dumpable {
 
             if (existsSplit && existsCur && existsGiven) {
                 if (splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))
-                && !splitCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
+                        && !splitCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
                     checkout(givenHeadCommitId, n);
                     add(n);
                 }
@@ -588,7 +593,8 @@ public class Repository implements Serializable, Dumpable {
 
         for (String u: untrackedFiles) {
             if (inputCommitBlobs.containsKey(u)) {
-                errorExit("There is an untracked file in the way; delete it, or add and commit it first.");
+                errorExit("There is an untracked file in the way;" +
+                        " delete it, or add and commit it first.");
             }
         }
     }
