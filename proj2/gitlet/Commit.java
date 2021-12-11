@@ -24,6 +24,7 @@ public class Commit implements Serializable, Dumpable {
 
     /** The message of this Commit. */
     private File parentFile;
+    private File mergeParentFile;
     private Date date;
     private String commitMsg;
     private TreeMap<String, File> blobs;
@@ -36,6 +37,14 @@ public class Commit implements Serializable, Dumpable {
 
     Commit(File parentFile, String commitMsg, TreeMap<String, File> blobs) {
         this.parentFile = parentFile;
+        this.date = new Date();
+        this.commitMsg = commitMsg;
+        this.blobs = blobs;
+    }
+
+    Commit(File parentFile, File mergeParentFile, String commitMsg, TreeMap<String, File> blobs) {
+        this.parentFile = parentFile;
+        this.mergeParentFile = mergeParentFile;
         this.date = new Date();
         this.commitMsg = commitMsg;
         this.blobs = blobs;
@@ -87,6 +96,15 @@ public class Commit implements Serializable, Dumpable {
 
         System.out.println("===");
         System.out.println("commit " + getSha1());
+        /* Prints two parents for a merged commit. */
+        if (mergeParentFile != null) {
+            String parentCommitId = loadCommit(parentFile).getSha1();
+            String mergeParentCommitId = loadCommit(mergeParentFile).getSha1();
+            System.out.println("Merge: "
+                    + parentCommitId.substring(0, 7)
+                    + " "
+                    + mergeParentCommitId.substring(0, 7));
+        }
         System.out.println("Date: " + dateFormatter.format(date));
         System.out.println(commitMsg);
         System.out.println();

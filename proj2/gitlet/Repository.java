@@ -118,7 +118,7 @@ public class Repository implements Serializable, Dumpable {
         stageFile(filePathName, inputBlob, inputContent);
     }
 
-    /** Saves the current snapshot with staged files as  a commit. */
+    /** Saves the current snapshot with staged files as a commit. */
     public void commit(String commitMsg) {
         if (stagingArea.isEmpty()) {
             errorExit("No changes added to the commit.");
@@ -469,7 +469,7 @@ public class Repository implements Serializable, Dumpable {
 
         String commitMsg = "Merged " + inputBranchName + " into " + head;
 
-        commit(commitMsg);
+        mergeCommit(commitMsg, givenHeadCommitFile);
 
         if (isInConflict) {
             System.out.println("Encountered a merge conflict.");
@@ -631,8 +631,30 @@ public class Repository implements Serializable, Dumpable {
                 + curContent
                 + "=======\n"
                 + givenContent
-                + ">>>>>>>";
+                + ">>>>>>>\n";
 
         writeContents(join(CWD, filePathName), mergedContent);
+    }
+
+    /** Commit when merging. */
+    public void mergeCommit(String commitMsg, File mergeParentFile) {
+
+        /* Updates the head commit with staged files. */
+        headCommitBlobs = getHeadCommit().getBlobs();
+        headCommitBlobs.putAll(stagingArea);
+
+        /* Removes keys with null values as untracking files. */
+        headCommitBlobs.values().remove(null);
+
+        /* Creates a new commit. */
+        Commit c = new Commit(getHeadCommitFile(), mergeParentFile, commitMsg, headCommitBlobs);
+        File cFile = c.saveCommit();
+        commits.put(cFile, c.getParentFile());
+        branches.put(head, cFile);
+
+        /* Clears the staging area. */
+        stagingArea.clear();
+
+        saveRepo();
     }
 }
