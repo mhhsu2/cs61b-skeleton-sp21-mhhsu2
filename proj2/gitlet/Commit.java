@@ -74,9 +74,14 @@ public class Commit implements Serializable, Dumpable {
         return sha1(serializedCommit);
     }
 
-    /** Returns the File of the parent of this commit*/
+    /** Returns the File of the parent of this commit. */
     public File getParentFile() {
         return parentFile;
+    }
+
+    /** Returns the File of the parent of this commit*/
+    public File getMergeParentFile() {
+        return mergeParentFile;
     }
 
     /** Returns the commitMsg of this commit. */

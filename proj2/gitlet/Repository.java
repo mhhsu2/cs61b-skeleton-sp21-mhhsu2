@@ -601,18 +601,51 @@ public class Repository implements Serializable, Dumpable {
 
     /** Returns the latest split commitFile for two branches. */
     private File findLatestSplitCommit(File headCommitFileA, File headCommitFileB) {
-        Set<File> pSetA = new HashSet<>();
+        Set<File> pSetA = findParentSet(headCommitFileA);
+        Set<File> pSetB = findParentSet(headCommitFileB);
 
-        for (File a = headCommitFileA; a != null; a = commits.get(a)) {
-            pSetA.add(a);
-        }
-
-        for (File b = headCommitFileB; b != null; b = commits.get(b)) {
-            if (pSetA.contains(b)) {
-                return b;
+        for (File f : pSetB) {
+            if (pSetA.contains(f)) {
+                return f;
             }
         }
         return null;
+    }
+
+    /** Returns a set of parents for a given commit. */
+    private Set<File> findParentSet(File commitFile) {
+        Set<File> parentSet = new LinkedHashSet<>();
+        Queue<Commit> fringe = new ArrayDeque<>();
+
+        Commit curCommit = Commit.loadCommit(commitFile);
+        Commit parentCommit;
+        Commit mergeParentCommit;
+        File parentCommitFile;
+        File mergeParentCommitFile;
+
+        /* Starts with the given commit. */
+        fringe.add(curCommit);
+
+        while (!fringe.isEmpty()) {
+            curCommit = fringe.remove();
+            parentCommitFile = curCommit.getParentFile();
+            mergeParentCommitFile = curCommit.getMergeParentFile();
+            parentCommit = Commit.loadCommit(parentCommitFile);
+            mergeParentCommit = Commit.loadCommit(mergeParentCommitFile);
+
+
+            if (parentCommit != null && !parentSet.contains(parentCommitFile)) {
+                fringe.add(parentCommit);
+                parentSet.add(parentCommitFile);
+            }
+
+            if (mergeParentCommit != null && !parentSet.contains(mergeParentCommitFile)) {
+                fringe.add(mergeParentCommit);
+                parentSet.add(mergeParentCommitFile);
+            }
+        }
+
+        return parentSet;
     }
 
     /** Combines two file contents when merging in conflict. */
