@@ -133,7 +133,7 @@ public class Repository implements Serializable, Dumpable {
         headCommitBlobs.putAll(stagingArea);
 
         /* Removes keys with null values as untracking files. */
-        headCommitBlobs.values().remove(null);
+        headCommitBlobs.values().removeAll(Collections.singleton(null));
 
         /* Creates a new commit. */
         Commit c = new Commit(getHeadCommitFile(), commitMsg, headCommitBlobs);
@@ -387,11 +387,13 @@ public class Repository implements Serializable, Dumpable {
 
     /** Merge the current branch with a given branch. */
     public void merge(String inputBranchName) {
+        if (!branches.containsKey(inputBranchName)) {
+            errorExit("A branch with that name does not exist.");
+        }
         File curHeadCommitFile = branches.get(head);
         File givenHeadCommitFile = branches.get(inputBranchName);
         File splitCommitFile = findLatestSplitCommit(curHeadCommitFile,
                 givenHeadCommitFile);
-
         String givenHeadCommitId = Commit.loadCommit(givenHeadCommitFile).getSha1();
 
         /* Given branch is an ancestor of the current branch. */
@@ -399,14 +401,12 @@ public class Repository implements Serializable, Dumpable {
             System.out.println("Cannot merge a branch with itself.");
             return;
         }
-
         /* Current branch fast-forwarded. */
         if (splitCommitFile.equals(curHeadCommitFile)) {
             checkoutBranch(inputBranchName);
             System.out.println("Current branch fast-forwarded.");
             return;
         }
-
         /* Gets all files in the three commits. */
         TreeMap<String, File> curHeadCommitBlobs =
                 Commit.loadCommit(curHeadCommitFile).getBlobs();
@@ -420,7 +420,6 @@ public class Repository implements Serializable, Dumpable {
         unionFileNames.addAll(splitCommitBlobs.keySet());
 
         boolean isInConflict = false;
-
         for (String n : unionFileNames) {
             /* Checks the presence of a file in the above three commits. */
             Boolean existsCur = curHeadCommitBlobs.containsKey(n);
@@ -433,7 +432,6 @@ public class Repository implements Serializable, Dumpable {
                     checkout(givenHeadCommitId, n);
                     add(n);
                 }
-
                 if (!splitCommitBlobs.get(n).equals(curHeadCommitBlobs.get(n))
                         && !splitCommitBlobs.get(n).equals(givenHeadCommitBlobs.get(n))) {
                     mergeConflict(n, curHeadCommitBlobs.get(n), givenHeadCommitBlobs.get(n));
@@ -465,12 +463,8 @@ public class Repository implements Serializable, Dumpable {
                 }
             }
         }
-
-
-        String commitMsg = "Merged " + inputBranchName + " into " + head;
-
+        String commitMsg = "Merged " + inputBranchName + " into " + head +  ".";
         mergeCommit(commitMsg, givenHeadCommitFile);
-
         if (isInConflict) {
             System.out.println("Encountered a merge conflict.");
         }
@@ -593,8 +587,8 @@ public class Repository implements Serializable, Dumpable {
 
         for (String u: untrackedFiles) {
             if (inputCommitBlobs.containsKey(u)) {
-                errorExit("There is an untracked file in the way;" +
-                        " delete it, or add and commit it first.");
+                errorExit("There is an untracked file in the way;"
+                        + " delete it, or add and commit it first.");
             }
         }
     }
@@ -625,6 +619,7 @@ public class Repository implements Serializable, Dumpable {
 
         /* Starts with the given commit. */
         fringe.add(curCommit);
+        parentSet.add(commitFile);
 
         while (!fringe.isEmpty()) {
             curCommit = fringe.remove();
@@ -632,6 +627,7 @@ public class Repository implements Serializable, Dumpable {
             mergeParentCommitFile = curCommit.getMergeParentFile();
             parentCommit = Commit.loadCommit(parentCommitFile);
             mergeParentCommit = Commit.loadCommit(mergeParentCommitFile);
+
 
 
             if (parentCommit != null && !parentSet.contains(parentCommitFile)) {
