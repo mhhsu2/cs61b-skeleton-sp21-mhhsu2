@@ -398,7 +398,7 @@ public class Repository implements Serializable, Dumpable {
 
         /* Given branch is an ancestor of the current branch. */
         if (splitCommitFile.equals(givenHeadCommitFile)) {
-            System.out.println("Cannot merge a branch with itself.");
+            System.out.println("Given branch is an ancestor of the current branch.");
             return;
         }
         /* Current branch fast-forwarded. */
