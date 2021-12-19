@@ -74,18 +74,18 @@ public class HexWorld {
         }
     }
 
-    public void tessWorld(int size) {
+    public void tessWorld(int tSize, int hexSize) {
         int cx = width/2;
         int cy = height/2;
 
-        for (int l = 0; l < size; l += 1) {
-            int lenLayer = size + l;
+        for (int l = 0; l < tSize; l += 1) {
+            int lenLayer = tSize + l;
             for (int r = 0; r < lenLayer; r += 1) {
-                int hxl = cx - (2 * size - 1) * (size - l - 1);
-                int hxr = cx + (2 * size - 1) * (size - l - 1);
-                int hy = cy - 2 * size * (lenLayer / 2 - r) + ((l + size + 1) % 2) * size;
-                addHexagon(hxl, hy, size);
-                addHexagon(hxr, hy, size);
+                int hxl = cx - (2 * hexSize - 1) * (tSize - l - 1);
+                int hxr = cx + (2 * hexSize - 1) * (tSize - l - 1);
+                int hy = cy - 2 * hexSize * (lenLayer / 2 - r) + ((l + tSize + 1) % 2) * hexSize;
+                addHexagon(hxl, hy, hexSize);
+                addHexagon(hxr, hy, hexSize);
             }
         }
     }
@@ -96,7 +96,7 @@ public class HexWorld {
 
     public static void main(String[] args) {
         HexWorld w = new HexWorld(50, 50);
-        w.tessWorld(5);
+        w.tessWorld(3, 2);
 
 
         w.renderWorld();
