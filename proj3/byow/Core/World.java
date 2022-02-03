@@ -4,6 +4,7 @@ import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
 import java.util.HashSet;
+import java.util.Random;
 
 /**
  * This class represents a world in BYOW.
@@ -15,15 +16,21 @@ public class World {
     private int height;
     private TETile[][] tiles;
     private HashSet<Room> rooms;
+    private long seed;
+    private Random random;
+
+    private static final int MIN_ROOM_SIZE = 5;
 
     /**
      * Constructs a initialized world.
      */
-    World(int width, int height) {
+    World(int width, int height, long seed) {
         this.width = width;
         this.height = height;
         this.tiles = new TETile[width][height];
         this.rooms = new HashSet<>();
+        this.seed = seed;
+        this.random = new Random(seed);
         initWorld();
     }
 
@@ -50,6 +57,18 @@ public class World {
         }
     }
 
+    public void addRandomRooms(int numRooms) {
+        while (rooms.size() < numRooms) {
+            int x = random.nextInt(width);
+            int y = random.nextInt(height);
+            Position pos = new Position(x, y);
+            int w = random.nextInt(5) + MIN_ROOM_SIZE;
+            int h = random.nextInt(5) + MIN_ROOM_SIZE;
+
+            addRoom(pos, w, h);
+        }
+
+    }
 
 
     /**
