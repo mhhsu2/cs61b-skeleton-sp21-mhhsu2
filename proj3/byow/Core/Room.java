@@ -14,7 +14,8 @@ public class Room {
 
 
     /**
-     * Constructs a room with given position and dimensions.
+     * Constructs a room with a given position and dimensions.
+     * The position address is the bottom left corner of the room.
      */
     Room(Position pos, int width, int height) {
         this.width = width;
@@ -23,16 +24,40 @@ public class Room {
     }
 
     /**
-     * Draw the room to the given world (tiles).
+     * Draws the room to the given world (tiles).
      */
     public void draw(TETile[][] tiles) {
         for (int dx = 0; dx < width; dx += 1) {
             for (int dy = 0; dy < height; dy += 1) {
-                tiles[pos.getX() + dx][pos.getY() + dy] = Tileset.FLOOR;
+                tiles[getMinX() + dx][getMinY() + dy] = Tileset.FLOOR;
             }
         }
 
         buildWall(tiles);
+    }
+
+    /**
+     * Returns true if the room is out of the border of the world.
+     */
+    public boolean isOutOfBoundary(World world) {
+        if (getMaxX() > world.getWidth()) {
+            return true;
+        }
+
+        return getMaxY() > world.getHeight();
+    }
+
+    /**
+     * Returns true if this room is overlapped with other objects on a world.
+     */
+    public boolean isOverlapped(TETile[][] tiles) {
+        boolean rv = false;
+        for (int dx = 0; dx < width; dx += 1) {
+            for (int dy = 0; dy < height; dy += 1) {
+                rv = isOccupied(tiles, getMinX() + dx, getMinY() + dy);
+            }
+        }
+        return rv;
     }
 
     // Get methods for instance variables
@@ -41,9 +66,8 @@ public class Room {
         return pos.getY() + height - 1;
     }
     private int getMinY() {
-        return pos.getX();
+        return pos.getY();
     }
-
     private int getMaxX() {
         return pos.getX() + width - 1;
     }
@@ -54,7 +78,9 @@ public class Room {
     // Helper methods
 
     /**
-     * Builds the top/bottom/left/right walls of a room.
+     * Builds the top/bottom/left/right walls of a room
+     * by substituting a one-tile-thick layer
+     * of the room with Tileset.WALL.
      */
     private void buildWall(TETile[][] tiles) {
         /* Top wall */
@@ -78,5 +104,13 @@ public class Room {
         }
     }
 
+    /**
+     * Returns true if the tile at x and y has something there.
+     * Else returns false.
+     */
+    private boolean isOccupied(TETile[][] tiles, int x, int y) {
+        // Checks if the tile is occupied by or not.
+        return !tiles[x][y].equals(Tileset.NOTHING);
+    }
 
 }

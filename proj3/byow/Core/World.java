@@ -3,6 +3,8 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.util.HashSet;
+
 /**
  * This class represents a world in BYOW.
  * This class manges objects such as rooms and hallways in a world.
@@ -12,7 +14,7 @@ public class World {
     private int width;
     private int height;
     private TETile[][] tiles;
-//    private SomeDataStructures rooms:
+    private HashSet<Room> rooms;
 
     /**
      * Constructs a initialized world.
@@ -21,6 +23,7 @@ public class World {
         this.width = width;
         this.height = height;
         this.tiles = new TETile[width][height];
+        this.rooms = new HashSet<>();
         initWorld();
     }
 
@@ -41,14 +44,30 @@ public class World {
      */
     public void addRoom(Position pos, int width, int height) {
         Room room = new Room(pos, width, height);
-        room.draw(tiles);
-
+        if (!room.isOutOfBoundary(this) && !room.isOverlapped(tiles)) {
+            room.draw(tiles);
+            rooms.add(room);
+        }
     }
+
+
 
     /**
      * Get methods for instance variables.
      */
     public TETile[][] getTiles() {
         return this.tiles;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public int getNumRooms() {
+        return this.rooms.size();
     }
 }
