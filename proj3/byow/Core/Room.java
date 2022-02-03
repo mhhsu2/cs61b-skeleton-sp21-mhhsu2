@@ -40,10 +40,10 @@ public class Room {
      * Returns true if the room is out of the border of the world.
      */
     public boolean isOutOfBoundary(World world) {
-        if (getMaxX() > world.getWidth()) {
+        if (getMaxX() >= world.getWidth()) {
             return true;
         }
-        if (getMaxY() > world.getHeight()) {
+        if (getMaxY() >= world.getHeight()) {
             return true;
         }
         if (getMinX() < 0) {
