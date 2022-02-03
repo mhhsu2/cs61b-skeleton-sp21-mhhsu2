@@ -59,13 +59,14 @@ public class Room {
      * Returns true if this room is overlapped with other objects on a world.
      */
     public boolean isOverlapped(TETile[][] tiles) {
-        boolean rv = false;
         for (int dx = 0; dx < width; dx += 1) {
             for (int dy = 0; dy < height; dy += 1) {
-                rv = isOccupied(tiles, getMinX() + dx, getMinY() + dy);
+                if (isOccupied(tiles, getMinX() + dx, getMinY() + dy)) {
+                    return true;
+                }
             }
         }
-        return rv;
+        return false;
     }
 
     // Get methods for instance variables
