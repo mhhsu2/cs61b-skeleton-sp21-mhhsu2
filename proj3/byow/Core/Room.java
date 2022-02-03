@@ -43,8 +43,16 @@ public class Room {
         if (getMaxX() > world.getWidth()) {
             return true;
         }
-
-        return getMaxY() > world.getHeight();
+        if (getMaxY() > world.getHeight()) {
+            return true;
+        }
+        if (getMinX() < 0) {
+            return true;
+        }
+        if (getMinY() < 0) {
+            return true;
+        }
+        return false;
     }
 
     /**
