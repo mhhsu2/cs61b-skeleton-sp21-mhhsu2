@@ -12,7 +12,6 @@ public class Room {
     private int height;
     private Position pos;
 
-
     /**
      * Constructs a room with a given position and dimensions.
      * The position address is the bottom left corner of the room.
@@ -67,6 +66,16 @@ public class Room {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the distance from this room to another room.
+     */
+    public double getDistance(Room roomB) {
+        return Math.sqrt(
+                Math.pow(getMinX() - roomB.getMinX(), 2)
+                + Math.pow(getMinY() - roomB.getMinY(), 2)
+        );
     }
 
     // Get methods for instance variables
