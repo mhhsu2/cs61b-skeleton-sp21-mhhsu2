@@ -57,6 +57,10 @@ public class World {
         }
     }
 
+    /**
+     * Adds rooms with random positions and dimensions
+     * until numRooms rooms exists.
+     */
     public void addRandomRooms(int numRooms) {
         while (rooms.size() < numRooms) {
             int x = random.nextInt(width);
@@ -67,6 +71,13 @@ public class World {
 
             addRoom(pos, w, h);
         }
+    }
+
+    /**
+     * Connects two rooms by building a hallway
+     * between the rooms.
+     */
+    private void connectRooms(Room roomA, Room roomB) {
 
     }
 

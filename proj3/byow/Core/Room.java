@@ -7,7 +7,7 @@ import byow.TileEngine.Tileset;
 /**
  * This class is a basic unit that comprises a world in BYOW.
  */
-public class Room {
+public class Room implements Dimension {
     private int width;
     private int height;
     private Position pos;
@@ -76,6 +76,14 @@ public class Room {
                 Math.pow(getMinX() - roomB.getMinX(), 2)
                 + Math.pow(getMinY() - roomB.getMinY(), 2)
         );
+    }
+
+    /**
+     * Returns the (x, y) coordinate of this room.
+     */
+    @Override
+    public int[] getCoords() {
+        return new int[] {getMinX(), getMinY()};
     }
 
     // Get methods for instance variables

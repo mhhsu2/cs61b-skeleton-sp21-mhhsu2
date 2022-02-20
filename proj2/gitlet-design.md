@@ -56,6 +56,8 @@ This class represents an individual commit.
 2. `public void add(File f)` Adds file `f` into the stage area.
 3. `public void saveRepo()` Saves the current state of this repo as a serialized file `HEAD`.
 4. `public static Repository loadRepo()` Loads the previous state of the repo from `HEAD`.
+5. `public void commit(String commitMsg)` Saves the current snapshot with staged files as  a commit.
+6. 
 
 ### Commit
 
