@@ -1,6 +1,6 @@
 package byow.Core;
 
-public class Position {
+public class Position implements Dimension {
     private int x;
     private int y;
 
@@ -21,5 +21,10 @@ public class Position {
 
     public int getY() {
         return this.y;
+    }
+
+    @Override
+    public int[] getCoords() {
+        return new int[] {x, y};
     }
 }
