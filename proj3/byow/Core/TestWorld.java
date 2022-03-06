@@ -70,12 +70,30 @@ public class TestWorld {
         ter.renderFrame(w.getTiles());
     }
 
+    @Test
+    public void testAddHallway() {
+        Position p1 = new Position(25, 8);
+        w.addHallway(15, p1, "North");
+
+        Position p2 = new Position(20, 15);
+        w.addHallway(15, p2, "South");
+
+        Position p3 = new Position(25, 8);
+        w.addHallway(15, p3, "East");
+
+        Position p4 = new Position(60, 12);
+        w.addHallway(15, p4, "West");
+
+        ter.renderFrame(w.getTiles());
+    }
+
     public static void main(String[] args) {
         TestWorld tester = new TestWorld();
 //        tester.testAddRoom();
 //        tester.testAddRoomOverlapped();
 //        tester.testAddRoomOutOfBoundary();
-        tester.testAddRandomRooms();
+//        tester.testAddRandomRooms();
+        tester.testAddHallway();
     }
 
 }

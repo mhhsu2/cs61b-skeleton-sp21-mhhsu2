@@ -74,6 +74,14 @@ public class World {
     }
 
     /**
+     * Adds a hallway to the world.
+     */
+    public void addHallway(int length, Position pos, String orientation) {
+        Hallway hall = new Hallway(length, pos, orientation);
+        hall.draw(tiles);
+    }
+
+    /**
      * Connects two rooms by building a hallway
      * between the rooms.
      */
