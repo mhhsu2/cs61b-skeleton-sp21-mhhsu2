@@ -3,8 +3,7 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
 
 /**
  * This class represents a world in BYOW.
@@ -15,7 +14,7 @@ public class World {
     private int width;
     private int height;
     private TETile[][] tiles;
-    private HashSet<Room> rooms;
+    private List<Room> rooms;
     private long seed;
     private Random random;
 
@@ -28,7 +27,7 @@ public class World {
         this.width = width;
         this.height = height;
         this.tiles = new TETile[width][height];
-        this.rooms = new HashSet<>();
+        this.rooms = new ArrayList<>();
         this.seed = seed;
         this.random = new Random(seed);
         initWorld();
@@ -76,17 +75,70 @@ public class World {
     /**
      * Adds a hallway to the world.
      */
-    public void addHallway(int length, Position pos, String orientation) {
+    public Hallway addHallway(int length, Position pos, String orientation) {
         Hallway hall = new Hallway(length, pos, orientation);
         hall.draw(tiles);
+        return hall;
     }
 
     /**
      * Connects two rooms by building a hallway
      * between the rooms.
      */
-    private void connectRooms(Room roomA, Room roomB) {
+    public void connectRooms(Room roomA, Room roomB) {
+        Position connPosA = roomA.randConnPos(random);
+        Position connPosB = roomB.randConnPos(random);
 
+        int displacementX = connPosB.getX() - connPosA.getX();
+        int displacementY = connPosB.getY() - connPosA.getY();
+
+        // Builds horizontal hallway starting from A.
+        Hallway honHall;
+        if (displacementX >= 0) {
+            honHall = addHallway(displacementX, connPosA, "East");
+        } else {
+            honHall = addHallway(-displacementX, connPosA, "West");
+        }
+
+        // Builds vertical hallway starting from the end of honHall.
+        Hallway verHall;
+        if (displacementY >= 0) {
+            verHall = addHallway(displacementY, honHall.getEndPos(), "North");
+        } else {
+            verHall = addHallway(-displacementY, honHall.getEndPos(), "South");
+        }
+
+        // Pads the corner at the intersection between honHall and verHall
+        padCorner(honHall, verHall);
+    }
+
+    /**
+     * A helper method pads the corner at the intersection between honHall and verHall.
+     */
+    private void padCorner(Hallway honHall, Hallway verHall) {
+        String honOrient = honHall.getOrientation();
+        String verOrient = verHall.getOrientation();
+
+        Position cornerPos = honHall.getEndPos();
+        int padX;
+        int padY;
+
+        if (honOrient.equals("East") && verOrient.equals("North")) {
+            padX = cornerPos.getX() + 1;
+            padY = cornerPos.getY() - 1;
+        } else if (honOrient.equals("East") && verOrient.equals("South")) {
+            padX = cornerPos.getX() + 1;
+            padY = cornerPos.getY() + 1;
+        } else if (honOrient.equals("West") && verOrient.equals("North")) {
+            padX = cornerPos.getX() - 1;
+            padY = cornerPos.getY() - 1;
+        } else {
+            padX = cornerPos.getX() - 1;
+            padY = cornerPos.getY() + 1;
+        }
+        if (tiles[padX][padY] == Tileset.NOTHING) {
+            tiles[padX][padY] = Tileset.WALL;
+        }
     }
 
 
@@ -108,4 +160,6 @@ public class World {
     public int getNumRooms() {
         return this.rooms.size();
     }
+
+    public List<Room> getRooms() {return this.rooms;}
 }

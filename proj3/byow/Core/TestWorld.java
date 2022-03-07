@@ -5,13 +5,15 @@ import byow.TileEngine.Tileset;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 public class TestWorld {
     private TERenderer ter;
     private World w;
 
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
-    public static final long SEED = 1256;
+    public static final int HEIGHT = 40;
+    public static final long SEED = 8888;
 
     TestWorld() {
         ter = new TERenderer();
@@ -65,7 +67,7 @@ public class TestWorld {
 
     @Test
     public void testAddRandomRooms() {
-        w.addRandomRooms(12);
+        w.addRandomRooms(15);
 
         ter.renderFrame(w.getTiles());
     }
@@ -87,13 +89,25 @@ public class TestWorld {
         ter.renderFrame(w.getTiles());
     }
 
+    @Test
+    public void testConnectRooms() {
+        List<Room> rooms = w.getRooms();
+
+        for (int i = 0; i < rooms.size() - 1; i++) {
+            w.connectRooms(rooms.get(i), rooms.get(i+1));
+        }
+
+        ter.renderFrame(w.getTiles());
+    }
+
     public static void main(String[] args) {
         TestWorld tester = new TestWorld();
 //        tester.testAddRoom();
 //        tester.testAddRoomOverlapped();
 //        tester.testAddRoomOutOfBoundary();
-//        tester.testAddRandomRooms();
-        tester.testAddHallway();
+        tester.testAddRandomRooms();
+//        tester.testAddHallway();
+        tester.testConnectRooms();
     }
 
 }

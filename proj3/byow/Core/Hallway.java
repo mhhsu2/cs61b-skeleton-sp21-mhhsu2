@@ -66,6 +66,42 @@ public class Hallway {
         }
     }
 
+    // Get Methods
+    public String getOrientation() {
+        return this.orientation;
+    }
+
+    /**
+     * Returns the end position of this hallway.
+     */
+    public Position getEndPos() {
+        int endX;
+        int endY;
+        switch (orientation) {
+            case "North" -> {
+                endX = pos.getX();
+                endY = pos.getY() + length - 1;
+                return new Position(endX, endY);
+            }
+            case "South" -> {
+                endX = pos.getX();
+                endY = pos.getY() - length + 1;
+                return new Position(endX, endY);
+            }
+            case "West" -> {
+                endX = pos.getX() - length + 1;
+                endY = pos.getY();
+                return new Position(endX, endY);
+            }
+            case "East" -> {
+                endX = pos.getX() + length - 1;
+                endY = pos.getY();
+                return new Position(endX, endY);
+            }
+        }
+        return null;
+    }
+
     // Helper Methods
 
     /**

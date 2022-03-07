@@ -4,6 +4,8 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.util.Random;
+
 /**
  * This class is a basic unit that comprises a world in BYOW.
  */
@@ -66,6 +68,16 @@ public class Room implements Dimension {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns a Position within this room for hallway connection.
+     */
+    public Position randConnPos(Random random) {
+        int x =  getMinX() + random.nextInt(width - 3) + 1;
+        int y =  getMinY() + random.nextInt(height - 3) + 1;
+
+        return new Position(x, y);
     }
 
     /**
