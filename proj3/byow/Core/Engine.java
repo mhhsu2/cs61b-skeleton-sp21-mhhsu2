@@ -55,8 +55,8 @@ public class Engine {
     private TETile[][] playGame(InputSource is) {
         World world = null;
         char mode = Character.toUpperCase(is.getNextKey());
-        TERenderer ter = new TERenderer();
-        ter.initialize(WIDTH, HEIGHT);
+//        TERenderer ter = new TERenderer();
+//        ter.initialize(WIDTH, HEIGHT);
 
         switch (mode) {
             case 'N' -> {
