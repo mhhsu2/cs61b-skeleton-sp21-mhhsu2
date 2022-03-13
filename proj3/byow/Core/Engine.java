@@ -1,13 +1,17 @@
 package byow.Core;
 
+import byow.InputDemo.InputSource;
+import byow.InputDemo.StringInputDevice;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import jh61b.junit.In;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
+    public static Long SEED;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -38,15 +42,50 @@ public class Engine {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] interactWithInputString(String input) {
-        // TODO: Fill out this method so that it run the engine using the input
+        // Runs the engine using the input
         // passed in as an argument, and return a 2D tile representation of the
         // world that would have been drawn if the same inputs had been given
         // to interactWithKeyboard().
         //
-        // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
-        // that works for many different input types.
 
-        TETile[][] finalWorldFrame = null;
-        return finalWorldFrame;
+        InputSource is = new StringInputDevice(input);
+        return playGame(is);
+    }
+
+    private TETile[][] playGame(InputSource is) {
+        World world = null;
+        char mode = Character.toUpperCase(is.getNextKey());
+        TERenderer ter = new TERenderer();
+        ter.initialize(WIDTH, HEIGHT);
+
+        switch (mode) {
+            case 'N' -> {
+                SEED = getSeedFromInputString(is);
+                world = new World(WIDTH, HEIGHT, SEED);
+                world.generateWorld();
+            }
+//                ter.renderFrame(world.getTiles());
+        }
+
+        if (world != null) {
+            return world.getTiles();
+        }
+        return null;
+    }
+
+    // Helper Methods
+    private Long getSeedFromInputString(InputSource is) {
+        StringBuilder sb = new StringBuilder();
+        while(is.possibleNextInput()) {
+            char c = is.getNextKey();
+
+            if (Character.toUpperCase(c) == 'S') {
+                break;
+            } else {
+                sb.append(c);
+            }
+        }
+
+        return Long.parseLong(sb.toString());
     }
 }
