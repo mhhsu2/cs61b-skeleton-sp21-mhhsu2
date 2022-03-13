@@ -90,12 +90,19 @@ public class TestWorld {
     }
 
     @Test
-    public void testConnectRooms() {
+    public void testConnectTwoRoom() {
         List<Room> rooms = w.getRooms();
 
         for (int i = 0; i < rooms.size() - 1; i++) {
-            w.connectRooms(rooms.get(i), rooms.get(i+1));
+            w.connectTwoRoom(rooms.get(i), rooms.get(i+1));
         }
+
+        ter.renderFrame(w.getTiles());
+    }
+
+    @Test
+    public void testGenerateWorld() {
+        w.generateWorld();
 
         ter.renderFrame(w.getTiles());
     }
@@ -105,9 +112,10 @@ public class TestWorld {
 //        tester.testAddRoom();
 //        tester.testAddRoomOverlapped();
 //        tester.testAddRoomOutOfBoundary();
-        tester.testAddRandomRooms();
+//        tester.testAddRandomRooms();
 //        tester.testAddHallway();
-        tester.testConnectRooms();
+//        tester.testConnectTwoRoom();
+        tester.testGenerateWorld();
     }
 
 }

@@ -45,6 +45,15 @@ public class World {
     }
 
     /**
+     * Generates a random world.
+     */
+    public void generateWorld() {
+        int numRooms = random.nextInt(15) + 10;
+        this.addRandomRooms(numRooms);
+        this.connectRooms();
+    }
+
+    /**
      * Adds a room that is not overlapped with
      * the existing rooms to the world.
      */
@@ -85,7 +94,7 @@ public class World {
      * Connects two rooms by building a hallway
      * between the rooms.
      */
-    public void connectRooms(Room roomA, Room roomB) {
+    public void connectTwoRoom(Room roomA, Room roomB) {
         Position connPosA = roomA.randConnPos(random);
         Position connPosB = roomB.randConnPos(random);
 
@@ -110,6 +119,15 @@ public class World {
 
         // Pads the corner at the intersection between honHall and verHall
         padCorner(honHall, verHall);
+    }
+
+    /**
+     * Connects all existing rooms in the world.
+     */
+    public void connectRooms() {
+        for (int i = 0; i < rooms.size() - 1; i++) {
+            connectTwoRoom(rooms.get(i), rooms.get(i+1));
+        }
     }
 
     /**
